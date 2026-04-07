@@ -1,0 +1,1838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Materna — 🤰 Pregnant Journey App</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --coral:#E07A5F; --coral-d:#c4614a; --coral-light:#FEE4DC; --coral-bg:#FFF5F2;
+  --olive:#6B7A5E; --olive-bg:#EEF4EB;
+  --lav:#8B92D4; --lav-bg:#ECEEF8;
+  --sun:#E8A820; --sun-bg:#FFF7E0;
+  --mint:#3D8A7A; --mint-bg:#E0F2EE;
+  --blush:#F2D9D0; --cream:#F8F4EE;
+  --ink:#1E1E24; --ink2:#4A4A55; --ink3:rgba(30,30,36,.45);
+  --white:#FFFFFF; --soft:#FAF8F5; --border:rgba(30,30,36,.08);
+  --serif:'DM Serif Display',serif; --sans:'Nunito',sans-serif;
+  --pw:375px; --ph:812px;
+  --pregnant-primary:#E07A5F;
+  --pregnant-soft:#FFF5F2;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:#0F1117;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:40px 20px 80px;overflow-x:hidden}
+
+.page-header{text-align:center;margin-bottom:32px;color:white}
+.page-header h1{font-family:var(--serif);font-size:32px;margin-bottom:8px}
+.page-header h1 em{color:var(--coral);font-style:italic}
+.page-header p{font-size:13px;color:rgba(255,255,255,.4);max-width:460px;margin:0 auto 16px}
+.badge-row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:8px}
+.badge{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;background:rgba(224,122,95,.15);color:var(--coral);border:1px solid rgba(224,122,95,.25)}
+
+/* Screen nav tabs */
+.screen-tabs{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-bottom:32px;max-width:800px}
+.stab{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid rgba(255,255,255,.1);background:rgba(255,255,255,.04);color:rgba(255,255,255,.5);cursor:pointer;transition:.2s;white-space:nowrap}
+.stab:hover{border-color:rgba(255,255,255,.25);color:white}
+.stab.active{background:var(--coral);border-color:var(--coral);color:white}
+.stab.section-divider{border-left:2px solid rgba(255,255,255,.2);margin-left:8px}
+
+/* Phone */
+.phone-wrap{position:relative;width:var(--pw);flex-shrink:0;margin:0 auto}
+.phone-frame{width:var(--pw);height:var(--ph);background:#1A1A1A;border-radius:52px;padding:12px;box-shadow:0 50px 140px rgba(0,0,0,.8),0 0 0 1px rgba(255,255,255,.07),inset 0 0 0 1px rgba(255,255,255,.03)}
+.phone-notch{width:126px;height:30px;background:#1A1A1A;border-radius:0 0 22px 22px;position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:20;display:flex;align-items:center;justify-content:center;gap:8px}
+.n-cam{width:11px;height:11px;background:#111;border-radius:50%;border:2px solid #2A2A2A}
+.n-spk{width:44px;height:5px;background:#222;border-radius:4px}
+.phone-screen{width:100%;height:100%;background:var(--soft);border-radius:42px;overflow:hidden;position:relative}
+
+/* Status bar */
+.sbar{height:44px;background:transparent;display:flex;align-items:flex-end;justify-content:space-between;padding:0 24px 6px;font-size:11px;font-weight:700;color:var(--ink);position:absolute;top:0;left:0;right:0;z-index:50}
+.sbar-right{display:flex;align-items:center;gap:4px}
+
+/* Screen system */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;pointer-events:none;transition:opacity .3s,transform .3s;transform:translateY(16px)}
+.screen.active{opacity:1;pointer-events:all;transform:translateY(0)}
+
+/* Scrollable */
+.scr{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;scroll-behavior:smooth}
+.scr::-webkit-scrollbar{display:none}
+
+/* Bottom nav */
+.bnav{height:72px;background:white;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-around;padding:0 8px 8px;position:relative;z-index:40;flex-shrink:0}
+.bni{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;padding:6px 12px;border-radius:12px;transition:.2s;min-width:52px}
+.bni:hover{background:var(--coral-light)}
+.bni.active .bni-icon{color:var(--coral)}
+.bni.active .bni-label{color:var(--coral)}
+.bni-icon{font-size:20px;line-height:1}
+.bni-label{font-size:10px;font-weight:700;color:var(--ink3);transition:.2s}
+.bni.active .bni-label{color:var(--coral)}
+
+/* Top nav */
+.topnav{padding:52px 20px 12px;display:flex;align-items:center;justify-content:space-between;background:white;border-bottom:1px solid var(--border);flex-shrink:0}
+.tnav-back{width:36px;height:36px;background:var(--soft);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px}
+.tnav-title{font-family:var(--serif);font-size:17px;color:var(--ink)}
+.tnav-action{width:36px;height:36px;background:var(--coral-light);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;font-size:16px}
+
+/* Cards */
+.card{background:white;border-radius:16px;padding:16px;border:1px solid var(--border);margin-bottom:12px}
+.card-sm{background:white;border-radius:12px;padding:14px;border:1px solid var(--border)}
+.card-coral{background:var(--coral);border-radius:16px;padding:16px;color:white}
+.card-soft{background:var(--soft);border-radius:12px;padding:14px}
+.card-gradient{background:linear-gradient(135deg,var(--coral) 0%,#C85A3F 100%);border-radius:20px;padding:20px;color:white}
+
+/* Buttons */
+.btn{padding:16px 24px;border-radius:14px;font-family:var(--sans);font-size:15px;font-weight:700;border:none;cursor:pointer;transition:.2s;display:flex;align-items:center;justify-content:center;gap:8px;width:100%}
+.btn-coral{background:var(--coral);color:white}
+.btn-coral:hover{background:var(--coral-d)}
+.btn-outline{background:transparent;color:var(--ink);border:1.5px solid var(--border)}
+.btn-sm{padding:10px 18px;font-size:13px;font-weight:700;border-radius:10px;border:none;cursor:pointer;transition:.2s}
+.btn-sm-coral{background:var(--coral-light);color:var(--coral)}
+.btn-sm-olive{background:var(--olive-bg);color:var(--olive)}
+
+/* Pill tags */
+.pill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:4px}
+.pill-coral{background:var(--coral-light);color:var(--coral)}
+.pill-green{background:#E8F5EE;color:#2E7D52}
+.pill-yellow{background:var(--sun-bg);color:#A67A10}
+.pill-red{background:#FFE8E8;color:#C0392B}
+.pill-lav{background:var(--lav-bg);color:var(--lav)}
+.pill-mint{background:var(--mint-bg);color:var(--mint)}
+
+/* AI badge */
+.ai-chip{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;background:linear-gradient(135deg,#667eea,#764ba2);border-radius:20px;font-size:10px;font-weight:700;color:white}
+
+/* Section header */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-hdr h3{font-family:var(--serif);font-size:16px;color:var(--ink)}
+.sec-see{font-size:12px;font-weight:700;color:var(--coral);cursor:pointer}
+
+/* Input fields */
+.inp{width:100%;padding:14px 16px;border-radius:12px;border:1.5px solid var(--border);font-family:var(--sans);font-size:14px;color:var(--ink);background:var(--soft);outline:none;transition:.2s}
+.inp:focus{border-color:var(--coral)}
+.inp-label{font-size:12px;font-weight:700;color:var(--ink3);margin-bottom:6px;display:block}
+
+/* Modals */
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);z-index:100;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;pointer-events:none;transition:.3s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal-sheet{background:white;border-radius:24px 24px 0 0;padding:24px;max-height:85%;overflow-y:auto}
+.modal-sheet::-webkit-scrollbar{display:none}
+.modal-handle{width:40px;height:4px;background:var(--border);border-radius:4px;margin:0 auto 20px}
+.modal-title{font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:16px}
+
+/* Toast */
+.toast{position:absolute;bottom:90px;left:16px;right:16px;background:var(--ink);color:white;padding:12px 16px;border-radius:12px;font-size:13px;font-weight:600;z-index:200;display:flex;align-items:center;gap:8px;opacity:0;transform:translateY(12px);transition:.3s;pointer-events:none}
+.toast.show{opacity:1;transform:translateY(0)}
+
+/* Divider */
+.divider{height:1px;background:var(--border);margin:12px 0}
+
+/* Avatar */
+.avatar{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.avatar-sm{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+
+/* Horizontal scroll */
+.hscroll{display:flex;gap:10px;overflow-x:auto;padding:2px 4px;-webkit-overflow-scrolling:touch}
+.hscroll::-webkit-scrollbar{display:none}
+
+/* Week tracker bubble */
+.week-bubble{width:40px;height:40px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:.2s}
+.week-bubble.done{background:var(--coral);color:white}
+.week-bubble.current{background:var(--coral);color:white;box-shadow:0 0 0 3px var(--coral-light),0 0 0 6px rgba(224,122,95,.15);transform:scale(1.1)}
+.week-bubble.upcoming{background:var(--soft);border:1.5px dashed rgba(224,122,95,.3);color:var(--ink3)}
+.week-bubble-num{font-size:11px;font-weight:800;line-height:1}
+.week-bubble-w{font-size:8px;opacity:.8;line-height:1}
+
+/* Vital ring */
+.vital-ring{width:60px;height:60px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+
+/* Animation */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.fade-up{animation:fadeUp .4s ease forwards}
+
+/* Progress step */
+.prog-step{display:flex;align-items:center;gap:8px;padding:10px 0}
+.prog-dot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+.prog-dot.done{background:var(--coral);color:white}
+.prog-dot.active{background:var(--coral-light);color:var(--coral);border:2px solid var(--coral)}
+.prog-dot.pending{background:var(--soft);color:var(--ink3)}
+.prog-line{width:2px;height:20px;background:var(--border);margin-left:13px}
+.prog-line.done{background:var(--coral)}
+
+/* Symptom chip */
+.symptom-chip{padding:8px 14px;border-radius:20px;font-size:12px;font-weight:700;border:1.5px solid var(--border);background:white;cursor:pointer;transition:.2s;flex-shrink:0}
+.symptom-chip.selected{background:var(--coral-light);border-color:var(--coral);color:var(--coral)}
+
+/* Chat bubble */
+.chat-wrap{display:flex;gap:8px;margin-bottom:12px;align-items:flex-end}
+.chat-wrap.user{flex-direction:row-reverse}
+.chat-bubble{max-width:80%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.5}
+.chat-bubble.ai{background:white;border:1px solid var(--border);color:var(--ink);border-bottom-left-radius:4px}
+.chat-bubble.user{background:var(--coral);color:white;border-bottom-right-radius:4px}
+.chat-time{font-size:10px;color:var(--ink3);margin-top:3px}
+
+/* Medical doc card */
+.doc-card{background:white;border-radius:12px;border:1px solid var(--border);padding:12px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.doc-icon{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+
+/* Video call overlay */
+.vcall-bg{position:absolute;inset:0;background:linear-gradient(180deg,#1a2a1a 0%,#0a1a0a 100%);z-index:60;display:flex;flex-direction:column}
+.vcall-pip{width:100px;height:140px;background:#2a1a1a;border-radius:12px;position:absolute;top:80px;right:16px;border:2px solid rgba(255,255,255,.2);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:36px}
+
+/* Alert card */
+.alert-card{border-radius:14px;padding:14px;border-left:4px solid;display:flex;gap:10px;align-items:flex-start}
+.alert-red{background:#FFF5F5;border-color:#E53E3E}
+.alert-yellow{background:var(--sun-bg);border-color:var(--sun)}
+.alert-green{background:#F0FFF4;border-color:#38A169}
+.alert-blue{background:#EBF8FF;border-color:#3182CE}
+
+/* Timeline dot */
+.timeline-item{display:flex;gap:12px;padding-bottom:16px;position:relative}
+.timeline-item::before{content:'';position:absolute;left:15px;top:28px;bottom:0;width:2px;background:var(--border)}
+.timeline-item:last-child::before{display:none}
+.t-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;border:2px solid white;box-shadow:0 2px 8px rgba(0,0,0,.1)}
+
+/* Growth chart bar */
+.growth-bar{height:6px;border-radius:4px;background:linear-gradient(90deg,var(--coral-light),var(--coral));transition:.5s}
+
+/* Appointment slot */
+.slot{padding:10px 14px;border-radius:10px;font-size:13px;font-weight:700;border:1.5px solid var(--border);cursor:pointer;transition:.2s;text-align:center;background:white}
+.slot:hover{border-color:var(--coral);color:var(--coral)}
+.slot.booked{background:var(--coral);color:white;border-color:var(--coral)}
+.slot.unavailable{background:var(--soft);color:var(--ink3);cursor:not-allowed;opacity:.5}
+
+/* Onboarding specific */
+.ob-screen{background:var(--soft)}
+.ob-illu{width:140px;height:140px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:64px}
+
+/* Tab bar */
+.tab-bar{display:flex;border-bottom:2px solid var(--border);flex-shrink:0;background:white}
+.tab{flex:1;padding:12px 4px;font-size:12px;font-weight:700;color:var(--ink3);cursor:pointer;transition:.2s;text-align:center;border-bottom:2px solid transparent;margin-bottom:-2px}
+.tab.active{color:var(--coral);border-bottom-color:var(--coral)}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Materna — <em>Pregnant Journey</em> 🤰</h1>
+  <p>Complete app prototype · All screens navigable · Tap buttons & links to explore flows</p>
+  <div class="badge-row">
+    <span class="badge">🤰 Pregnant User</span>
+    <span class="badge">Week 28 · 3rd Trimester</span>
+    <span class="badge">Priya Mehta</span>
+    <span class="badge">Dr. Anjali Sharma · Pune</span>
+  </div>
+</div>
+
+<div class="screen-tabs" id="screenTabs">
+  <div class="stab active" onclick="jumpTo('home')">🏠 Home</div>
+  <div class="stab" onclick="jumpTo('pregnancy')">🤰 Pregnancy</div>
+  <div class="stab" onclick="jumpTo('appointments')">📅 Appointments</div>
+  <div class="stab" onclick="jumpTo('records')">📋 Records</div>
+  <div class="stab" onclick="jumpTo('chat')">💬 Maia AI</div>
+  <div class="stab section-divider" onclick="jumpTo('book-appt')">📆 Book Appt</div>
+  <div class="stab" onclick="jumpTo('upload-doc')">📤 Upload Doc</div>
+  <div class="stab" onclick="jumpTo('telehealth')">🎥 Telehealth</div>
+  <div class="stab" onclick="jumpTo('emergency')">🚨 Emergency</div>
+  <div class="stab" onclick="jumpTo('profile')">👤 Profile</div>
+  <div class="stab" onclick="jumpTo('alerts')">🔔 Alerts</div>
+  <div class="stab" onclick="jumpTo('education')">📚 Education</div>
+</div>
+
+<div class="phone-wrap">
+  <div class="phone-frame">
+    <div class="phone-notch"><div class="n-spk"></div><div class="n-cam"></div></div>
+    <div class="phone-screen">
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: HOME (Pregnant Dashboard)
+      ══════════════════════════════════════════ -->
+      <div class="screen active" id="screen-home">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="scr" style="padding-bottom:80px;background:var(--soft)">
+          <!-- Hero gradient header -->
+          <div style="background:linear-gradient(155deg,var(--coral) 0%,#C85A3F 100%);padding:52px 20px 28px;position:relative;overflow:hidden">
+            <div style="position:absolute;top:-20px;right:-20px;width:120px;height:120px;background:rgba(255,255,255,.08);border-radius:50%"></div>
+            <div style="position:absolute;bottom:-40px;left:-10px;width:100px;height:100px;background:rgba(255,255,255,.06);border-radius:50%"></div>
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:20px;position:relative">
+              <div>
+                <p style="font-size:12px;color:rgba(255,255,255,.7);font-weight:600">Good morning ☀️</p>
+                <h2 style="font-family:var(--serif);font-size:22px;color:white">Priya Mehta</h2>
+              </div>
+              <div onclick="jumpTo('alerts')" style="position:relative;cursor:pointer">
+                <div style="width:40px;height:40px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px">🔔</div>
+                <div style="position:absolute;top:-4px;right:-4px;width:16px;height:16px;background:#FFD700;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;color:#333">3</div>
+              </div>
+            </div>
+            <!-- Week pill -->
+            <div style="background:rgba(255,255,255,.2);backdrop-filter:blur(8px);border-radius:16px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;position:relative">
+              <div>
+                <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:600;margin-bottom:2px">YOU ARE</p>
+                <p style="font-family:var(--serif);font-size:28px;color:white;line-height:1">Week <strong>28</strong></p>
+                <p style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">3rd Trimester · 84 days to go 🎉</p>
+              </div>
+              <div style="text-align:center">
+                <div style="font-size:48px;line-height:1">🥦</div>
+                <p style="font-size:10px;color:rgba(255,255,255,.75);font-weight:600;margin-top:2px">Size of an eggplant</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Alert Banner -->
+          <div style="margin:14px 16px 0;background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="showModal('modal-ai-alert')">
+            <div style="font-size:22px">✨</div>
+            <div style="flex:1">
+              <p style="font-size:12px;color:rgba(255,255,255,.8);font-weight:600">Maia AI · Proactive Alert</p>
+              <p style="font-size:13px;color:white;font-weight:700">Your BP reading from last visit needs attention</p>
+            </div>
+            <div style="color:rgba(255,255,255,.6);font-size:16px">›</div>
+          </div>
+
+          <!-- Quick actions -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>Quick Actions</h3></div>
+            <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+              <div onclick="jumpTo('book-appt')" style="background:white;border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;border:1px solid var(--border)">
+                <div style="font-size:24px;margin-bottom:6px">📅</div>
+                <p style="font-size:10px;font-weight:700;color:var(--ink2)">Book Appt</p>
+              </div>
+              <div onclick="jumpTo('chat')" style="background:white;border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;border:1px solid var(--border)">
+                <div style="font-size:24px;margin-bottom:6px">🤖</div>
+                <p style="font-size:10px;font-weight:700;color:var(--ink2)">Ask Maia</p>
+              </div>
+              <div onclick="jumpTo('upload-doc')" style="background:white;border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;border:1px solid var(--border)">
+                <div style="font-size:24px;margin-bottom:6px">📤</div>
+                <p style="font-size:10px;font-weight:700;color:var(--ink2)">Upload Lab</p>
+              </div>
+              <div onclick="jumpTo('telehealth')" style="background:white;border-radius:14px;padding:12px 6px;text-align:center;cursor:pointer;border:1px solid var(--border)">
+                <div style="font-size:24px;margin-bottom:6px">🎥</div>
+                <p style="font-size:10px;font-weight:700;color:var(--ink2)">Video Call</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Next appointment -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>Next Appointment</h3><span class="sec-see" onclick="jumpTo('appointments')">View all</span></div>
+            <div onclick="jumpTo('appointments')" style="background:white;border-radius:16px;border:1px solid var(--border);padding:14px;cursor:pointer;display:flex;gap:12px;align-items:center">
+              <div style="width:50px;height:50px;background:var(--coral-light);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <p style="font-size:18px;font-weight:800;color:var(--coral);line-height:1">15</p>
+                <p style="font-size:10px;font-weight:700;color:var(--coral)">MAR</p>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:14px;font-weight:700;color:var(--ink)">ANC Visit · 3rd Trimester</p>
+                <p style="font-size:12px;color:var(--ink3);margin-top:2px">Dr. Anjali Sharma · 10:30 AM</p>
+                <div style="display:flex;gap:6px;margin-top:6px">
+                  <span class="pill pill-green">✓ Confirmed</span>
+                  <span class="pill pill-lav">In-person</span>
+                </div>
+              </div>
+              <div style="font-size:18px;color:var(--coral)">›</div>
+            </div>
+          </div>
+
+          <!-- Vitals snapshot -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>My Vitals</h3><span class="sec-see" onclick="jumpTo('records')">Details</span></div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <div class="card-sm" style="text-align:center">
+                <div style="font-size:24px;margin-bottom:4px">💓</div>
+                <p style="font-size:18px;font-weight:800;color:var(--coral)">148/92</p>
+                <p style="font-size:11px;color:var(--ink3);font-weight:600">Blood Pressure</p>
+                <span class="pill pill-yellow" style="margin-top:4px">⚠ Watch</span>
+              </div>
+              <div class="card-sm" style="text-align:center">
+                <div style="font-size:24px;margin-bottom:4px">⚖️</div>
+                <p style="font-size:18px;font-weight:800;color:var(--ink)">72 kg</p>
+                <p style="font-size:11px;color:var(--ink3);font-weight:600">Weight</p>
+                <span class="pill pill-green" style="margin-top:4px">✓ Normal</span>
+              </div>
+              <div class="card-sm" style="text-align:center">
+                <div style="font-size:24px;margin-bottom:4px">🩸</div>
+                <p style="font-size:18px;font-weight:800;color:var(--ink)">10.8</p>
+                <p style="font-size:11px;color:var(--ink3);font-weight:600">Haemoglobin (g/dL)</p>
+                <span class="pill pill-yellow" style="margin-top:4px">⚠ Low</span>
+              </div>
+              <div class="card-sm" style="text-align:center">
+                <div style="font-size:24px;margin-bottom:4px">🚶</div>
+                <p style="font-size:18px;font-weight:800;color:var(--ink)">6,240</p>
+                <p style="font-size:11px;color:var(--ink3);font-weight:600">Steps Today</p>
+                <span class="pill pill-green" style="margin-top:4px">✓ Good</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANC checklist -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>ANC Checklist · Week 28</h3><span class="ai-chip">✦ AI</span></div>
+            <div class="card">
+              <div onclick="showModal('modal-anc')" style="cursor:pointer">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+                  <div style="flex:1;height:6px;background:var(--soft);border-radius:4px;overflow:hidden"><div style="height:100%;width:60%;background:var(--coral);border-radius:4px"></div></div>
+                  <span style="font-size:12px;font-weight:700;color:var(--coral)">3/5 done</span>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                  <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">✅</span><span style="font-size:13px;color:var(--ink)">Blood pressure check</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">✅</span><span style="font-size:13px;color:var(--ink)">Weight measurement</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">✅</span><span style="font-size:13px;color:var(--ink)">Fundal height check</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">⬜</span><span style="font-size:13px;color:var(--ink3)">GTT (Glucose Tolerance Test)</span><span class="pill pill-yellow" style="font-size:10px">Due soon</span></div>
+                  <div style="display:flex;align-items:center;gap:8px"><span style="font-size:14px">⬜</span><span style="font-size:13px;color:var(--ink3)">Morphology scan</span></div>
+                </div>
+                <p style="font-size:12px;color:var(--coral);font-weight:700;margin-top:10px;text-align:center">Tap to view full checklist ›</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's tip -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>Today's Tip</h3><span class="ai-chip">✦ Maia</span></div>
+            <div onclick="jumpTo('education')" style="background:linear-gradient(135deg,#F5EFE6,#F2D9D0);border-radius:16px;padding:16px;cursor:pointer">
+              <p style="font-size:11px;font-weight:700;color:var(--coral);margin-bottom:6px">WEEK 28 NUTRITION</p>
+              <p style="font-family:var(--serif);font-size:15px;color:var(--ink);margin-bottom:8px">Iron-rich foods during third trimester — what to eat</p>
+              <p style="font-size:12px;color:var(--ink3);line-height:1.5">Your iron needs increase significantly now. Lean red meat, spinach, and lentils are your best friends...</p>
+              <p style="font-size:12px;color:var(--coral);font-weight:700;margin-top:8px">Read more ›</p>
+            </div>
+          </div>
+
+          <!-- Baby movement tracker -->
+          <div style="padding:16px 16px 0">
+            <div class="sec-hdr"><h3>Kick Counter</h3></div>
+            <div onclick="showModal('modal-kick')" class="card" style="cursor:pointer;text-align:center;padding:20px">
+              <p style="font-size:40px;margin-bottom:8px">👶</p>
+              <p style="font-family:var(--serif);font-size:24px;color:var(--coral)">8 kicks today</p>
+              <p style="font-size:12px;color:var(--ink3);margin-top:4px">Last felt at 2:34 PM · Tap to log a kick</p>
+              <div style="margin-top:12px;padding:10px;background:var(--coral-light);border-radius:10px">
+                <p style="font-size:12px;font-weight:700;color:var(--coral)">✓ Normal movement — keep tracking!</p>
+              </div>
+            </div>
+          </div>
+
+          <div style="height:16px"></div>
+        </div>
+
+        <!-- Bottom Nav -->
+        <div class="bnav">
+          <div class="bni active" onclick="jumpTo('home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+          <div class="bni" onclick="jumpTo('pregnancy')"><div class="bni-icon">🤰</div><div class="bni-label">Journey</div></div>
+          <div class="bni" onclick="jumpTo('appointments')"><div class="bni-icon">📅</div><div class="bni-label">Appts</div></div>
+          <div class="bni" onclick="jumpTo('records')"><div class="bni-icon">📋</div><div class="bni-label">Records</div></div>
+          <div class="bni" onclick="jumpTo('profile')"><div class="bni-icon">👤</div><div class="bni-label">Me</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: PREGNANCY JOURNEY
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-pregnancy">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('home')">←</button>
+          <span class="tnav-title">My Pregnancy</span>
+          <button class="tnav-action" onclick="jumpTo('education')">📚</button>
+        </div>
+
+        <!-- Tab bar -->
+        <div class="tab-bar">
+          <div class="tab active" id="ptab-overview" onclick="switchPTab('overview')">Overview</div>
+          <div class="tab" id="ptab-weekly" onclick="switchPTab('weekly')">Weekly</div>
+          <div class="tab" id="ptab-milestones" onclick="switchPTab('milestones')">Milestones</div>
+          <div class="tab" id="ptab-growth" onclick="switchPTab('growth')">Baby</div>
+        </div>
+
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)" id="ptab-content">
+          <!-- Overview content (default) -->
+          <div id="ptab-overview-content">
+            <!-- Big week card -->
+            <div class="card-gradient" style="margin-bottom:14px">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start">
+                <div>
+                  <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:4px">YOU ARE CURRENTLY</p>
+                  <p style="font-family:var(--serif);font-size:36px;color:white;line-height:1">Week 28</p>
+                  <p style="font-size:13px;color:rgba(255,255,255,.8);margin-top:6px">3rd Trimester · Day 196</p>
+                  <p style="font-size:13px;color:rgba(255,255,255,.9);font-weight:600;margin-top:4px">84 days until EDD · March 14, 2025</p>
+                </div>
+                <div style="text-align:center">
+                  <div style="font-size:56px">🥦</div>
+                  <p style="font-size:10px;color:rgba(255,255,255,.75);font-weight:600">Eggplant<br>~37cm · 1kg</p>
+                </div>
+              </div>
+              <!-- Trimester progress -->
+              <div style="margin-top:14px">
+                <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(255,255,255,.7);font-weight:600;margin-bottom:6px">
+                  <span>T1: Wk 1–12</span><span>T2: Wk 13–27</span><span>T3: Wk 28–40</span>
+                </div>
+                <div style="height:8px;background:rgba(255,255,255,.2);border-radius:6px;overflow:hidden">
+                  <div style="height:100%;width:70%;background:white;border-radius:6px"></div>
+                </div>
+                <p style="font-size:10px;color:rgba(255,255,255,.8);font-weight:600;margin-top:4px;text-align:right">70% complete</p>
+              </div>
+            </div>
+
+            <!-- This week summary -->
+            <div class="card" style="margin-bottom:14px">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+                <span style="font-family:var(--serif);font-size:15px;color:var(--ink)">What's happening this week</span>
+                <span class="ai-chip">✦ AI</span>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+                <span style="font-size:18px">👶</span>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink)">Baby's development</p><p style="font-size:12px;color:var(--ink3);line-height:1.5;margin-top:3px">Eyes can now open and close. Baby can sense light. Brain is developing rapidly with billions of neurons forming.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start;margin-bottom:10px">
+                <span style="font-size:18px">🤰</span>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink)">Your body</p><p style="font-size:12px;color:var(--ink3);line-height:1.5;margin-top:3px">Back pain and shortness of breath may increase. Your uterus is now around your belly button.</p></div>
+              </div>
+              <div style="display:flex;gap:12px;align-items:flex-start">
+                <span style="font-size:18px">✅</span>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink)">Action items</p><p style="font-size:12px;color:var(--ink3);line-height:1.5;margin-top:3px">Schedule your 28-week ANC visit. Get Rh factor checked. Begin kick counting twice daily.</p></div>
+              </div>
+            </div>
+
+            <!-- Trimester timeline -->
+            <div class="sec-hdr"><h3>Pregnancy Timeline</h3></div>
+            <div class="card">
+              <div class="timeline-item">
+                <div class="t-dot" style="background:var(--mint-bg)">✅</div>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink)">1st Trimester (Wk 1–12)</p><p style="font-size:12px;color:var(--ink3);margin-top:2px">Completed · NT scan done · All clear</p></div>
+              </div>
+              <div class="timeline-item">
+                <div class="t-dot" style="background:var(--mint-bg)">✅</div>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink)">2nd Trimester (Wk 13–27)</p><p style="font-size:12px;color:var(--ink3);margin-top:2px">Completed · Anomaly scan normal · GDM screen done</p></div>
+              </div>
+              <div class="timeline-item">
+                <div class="t-dot" style="background:var(--coral-light);border:2px solid var(--coral)">🔵</div>
+                <div><p style="font-size:13px;font-weight:700;color:var(--coral)">3rd Trimester (Wk 28–40) ← You are here</p><p style="font-size:12px;color:var(--ink3);margin-top:2px">ANC visits every 2 weeks · Growth scans due</p></div>
+              </div>
+              <div class="timeline-item">
+                <div class="t-dot" style="background:var(--soft)">🍼</div>
+                <div><p style="font-size:13px;font-weight:700;color:var(--ink3)">Delivery</p><p style="font-size:12px;color:var(--ink3);margin-top:2px">Expected: June 14, 2025</p></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Weekly tracker (hidden initially) -->
+          <div id="ptab-weekly-content" style="display:none">
+            <p style="font-size:12px;color:var(--ink3);margin-bottom:12px;font-weight:600">Tap any week to see details</p>
+            <div class="hscroll" style="padding-bottom:12px;margin-bottom:16px">
+              <!-- Weeks 1–40 abbreviated -->
+              <div style="display:flex;flex-direction:column;gap:6px;min-width:max-content">
+                <div style="display:flex;gap:6px">
+                  <!-- T1 label -->
+                  <div style="writing-mode:vertical-rl;font-size:9px;font-weight:700;color:var(--ink3);text-orientation:mixed;padding:4px 0;min-width:20px;align-self:center">T1</div>
+                  <!-- Weeks 1-12 -->
+                  <script>
+                    // will be rendered inline via JS
+                  </script>
+                </div>
+              </div>
+            </div>
+
+            <!-- Rendered week grid -->
+            <div id="week-grid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:16px"></div>
+
+            <div class="card">
+              <p style="font-size:11px;font-weight:700;color:var(--coral);margin-bottom:4px">WEEK 28 DETAILS</p>
+              <p style="font-family:var(--serif);font-size:16px;color:var(--ink);margin-bottom:8px">Third Trimester begins</p>
+              <div style="display:flex;gap:8px;margin-bottom:10px">
+                <div style="flex:1;background:var(--coral-light);border-radius:10px;padding:10px;text-align:center">
+                  <p style="font-size:18px;font-weight:800;color:var(--coral)">37 cm</p>
+                  <p style="font-size:10px;color:var(--coral);font-weight:600">Length</p>
+                </div>
+                <div style="flex:1;background:var(--sun-bg);border-radius:10px;padding:10px;text-align:center">
+                  <p style="font-size:18px;font-weight:800;color:#A67A10">1 kg</p>
+                  <p style="font-size:10px;color:#A67A10;font-weight:600">Weight</p>
+                </div>
+                <div style="flex:1;background:var(--mint-bg);border-radius:10px;padding:10px;text-align:center">
+                  <p style="font-size:18px;font-weight:800;color:var(--mint)">148 bpm</p>
+                  <p style="font-size:10px;color:var(--mint);font-weight:600">Heart rate</p>
+                </div>
+              </div>
+              <p style="font-size:12px;color:var(--ink3);line-height:1.6">Baby's eyes open and close. Rapid Eye Movement (REM) sleep starts. Brain is making new connections every second. Lungs continue to mature.</p>
+            </div>
+          </div>
+
+          <!-- Milestones (hidden initially) -->
+          <div id="ptab-milestones-content" style="display:none">
+            <div class="card-soft" style="margin-bottom:14px">
+              <p style="font-size:12px;font-weight:700;color:var(--ink2);margin-bottom:8px">🎯 Upcoming Milestones</p>
+              <div class="timeline-item"><div class="t-dot" style="background:var(--sun-bg)">🔬</div><div><p style="font-size:13px;font-weight:700;color:var(--ink)">GTT (28 weeks)</p><p style="font-size:12px;color:var(--ink3)">Glucose tolerance test — Due this week</p><span class="pill pill-yellow" style="margin-top:4px">Due now</span></div></div>
+              <div class="timeline-item"><div class="t-dot" style="background:var(--lav-bg)">📸</div><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Growth Scan (30 weeks)</p><p style="font-size:12px;color:var(--ink3)">Ultrasound to assess baby's growth and position</p><span class="pill pill-lav" style="margin-top:4px">In 2 weeks</span></div></div>
+              <div class="timeline-item"><div class="t-dot" style="background:var(--mint-bg)">💉</div><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Tdap Vaccine (30–32 wks)</p><p style="font-size:12px;color:var(--ink3)">Protects newborn from whooping cough</p><span class="pill pill-mint" style="margin-top:4px">Upcoming</span></div></div>
+              <div class="timeline-item"><div class="t-dot" style="background:var(--soft)">🏥</div><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Hospital Pre-registration (36 wks)</p><p style="font-size:12px;color:var(--ink3)">Register at your delivery hospital</p></div></div>
+            </div>
+
+            <!-- Completed milestones -->
+            <div class="sec-hdr"><h3>Completed ✓</h3></div>
+            <div class="card">
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">NT Scan (12 weeks)</p><p style="font-size:11px;color:var(--ink3)">All normal · No structural issues</p></div></div>
+                <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Double Marker Test</p><p style="font-size:11px;color:var(--ink3)">Low risk result</p></div></div>
+                <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Anomaly Scan (20 weeks)</p><p style="font-size:11px;color:var(--ink3)">Normal fetal anatomy confirmed</p></div></div>
+                <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">GDM Screening (24 weeks)</p><p style="font-size:11px;color:var(--ink3)">1-hour GCT: 142 mg/dL (borderline)</p></div></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Baby tab (hidden) -->
+          <div id="ptab-growth-content" style="display:none">
+            <div style="text-align:center;padding:20px 0">
+              <div style="font-size:72px;margin-bottom:8px">🥦</div>
+              <p style="font-family:var(--serif);font-size:24px;color:var(--ink)">Week 28 Baby</p>
+              <p style="font-size:13px;color:var(--ink3);margin-top:4px">About the size of an eggplant</p>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px">
+              <div class="card-sm" style="text-align:center"><p style="font-size:20px;font-weight:800;color:var(--coral)">37 cm</p><p style="font-size:10px;color:var(--ink3);font-weight:600">Crown to heel</p></div>
+              <div class="card-sm" style="text-align:center"><p style="font-size:20px;font-weight:800;color:var(--coral)">1,000 g</p><p style="font-size:10px;color:var(--ink3);font-weight:600">Weight</p></div>
+              <div class="card-sm" style="text-align:center"><p style="font-size:20px;font-weight:800;color:var(--coral)">148</p><p style="font-size:10px;color:var(--ink3);font-weight:600">Heart bpm</p></div>
+            </div>
+            <div class="card">
+              <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">Development Progress</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:3px"><span>Brain development</span><span>85%</span></div><div style="height:6px;background:var(--soft);border-radius:4px"><div class="growth-bar" style="width:85%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:3px"><span>Lung maturity</span><span>65%</span></div><div style="height:6px;background:var(--soft);border-radius:4px"><div class="growth-bar" style="width:65%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:3px"><span>Bone density</span><span>70%</span></div><div style="height:6px;background:var(--soft);border-radius:4px"><div class="growth-bar" style="width:70%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:600;color:var(--ink3);margin-bottom:3px"><span>Fat stores</span><span>55%</span></div><div style="height:6px;background:var(--soft);border-radius:4px"><div class="growth-bar" style="width:55%"></div></div></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:10px">Size Through Your Pregnancy</p>
+              <div class="hscroll" style="gap:16px;padding:4px">
+                <div style="text-align:center;flex-shrink:0"><div style="font-size:28px">🫐</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 8<br>Blueberry</p></div>
+                <div style="text-align:center;flex-shrink:0"><div style="font-size:28px">🍋</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 12<br>Lemon</p></div>
+                <div style="text-align:center;flex-shrink:0"><div style="font-size:28px">🥑</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 16<br>Avocado</p></div>
+                <div style="text-align:center;flex-shrink:0"><div style="font-size:28px">🥭</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 20<br>Mango</p></div>
+                <div style="text-align:center;flex-shrink:0"><div style="font-size:32px">🌽</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 24<br>Corn</p></div>
+                <div style="text-align:center;flex-shrink:0;background:var(--coral-light);border-radius:10px;padding:6px"><div style="font-size:36px">🥦</div><p style="font-size:10px;font-weight:700;color:var(--coral)">Wk 28<br>Now!</p></div>
+                <div style="text-align:center;flex-shrink:0;opacity:.4"><div style="font-size:36px">🥥</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 32<br>Coconut</p></div>
+                <div style="text-align:center;flex-shrink:0;opacity:.4"><div style="font-size:40px">🎃</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 36<br>Pumpkin</p></div>
+                <div style="text-align:center;flex-shrink:0;opacity:.4"><div style="font-size:42px">🍉</div><p style="font-size:10px;font-weight:600;color:var(--ink3)">Wk 40<br>Watermelon</p></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="bnav">
+          <div class="bni" onclick="jumpTo('home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+          <div class="bni active" onclick="jumpTo('pregnancy')"><div class="bni-icon">🤰</div><div class="bni-label">Journey</div></div>
+          <div class="bni" onclick="jumpTo('appointments')"><div class="bni-icon">📅</div><div class="bni-label">Appts</div></div>
+          <div class="bni" onclick="jumpTo('records')"><div class="bni-icon">📋</div><div class="bni-label">Records</div></div>
+          <div class="bni" onclick="jumpTo('profile')"><div class="bni-icon">👤</div><div class="bni-label">Me</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: APPOINTMENTS
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-appointments">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('home')">←</button>
+          <span class="tnav-title">My Appointments</span>
+          <button class="tnav-action" onclick="jumpTo('book-appt')">＋</button>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+
+          <!-- Upcoming -->
+          <div class="sec-hdr"><h3>Upcoming</h3></div>
+          <!-- Next big appointment -->
+          <div onclick="showModal('modal-appt-detail')" class="card-coral" style="margin-bottom:12px;cursor:pointer">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px">
+              <div>
+                <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:2px">NEXT VISIT</p>
+                <p style="font-family:var(--serif);font-size:18px;color:white">ANC Visit · 28 Weeks</p>
+              </div>
+              <span style="background:rgba(255,255,255,.25);padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;color:white">In-person</span>
+            </div>
+            <div style="display:flex;gap:16px;margin-bottom:14px">
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">DATE</p><p style="font-size:15px;font-weight:700;color:white">Mar 15, 2025</p></div>
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">TIME</p><p style="font-size:15px;font-weight:700;color:white">10:30 AM</p></div>
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7);font-weight:600">DOCTOR</p><p style="font-size:15px;font-weight:700;color:white">Dr. Sharma</p></div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button onclick="event.stopPropagation();showToast('Appointment added to calendar!')" style="flex:1;padding:10px;background:rgba(255,255,255,.25);border:none;border-radius:10px;font-family:var(--sans);font-size:12px;font-weight:700;color:white;cursor:pointer">📅 Add to Calendar</button>
+              <button onclick="event.stopPropagation();showModal('modal-reschedule')" style="flex:1;padding:10px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:10px;font-family:var(--sans);font-size:12px;font-weight:700;color:white;cursor:pointer">🔄 Reschedule</button>
+            </div>
+          </div>
+
+          <!-- Other upcoming -->
+          <div class="card" style="margin-bottom:12px;cursor:pointer" onclick="showModal('modal-appt-detail')">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:48px;height:48px;background:var(--lav-bg);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <p style="font-size:16px;font-weight:800;color:var(--lav);line-height:1">22</p>
+                <p style="font-size:9px;font-weight:700;color:var(--lav)">MAR</p>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:14px;font-weight:700;color:var(--ink)">Growth Scan Ultrasound</p>
+                <p style="font-size:12px;color:var(--ink3);margin-top:2px">Dr. Anjali Sharma · 11:00 AM</p>
+                <div style="display:flex;gap:6px;margin-top:6px"><span class="pill pill-lav">Scan</span><span class="pill pill-green">Confirmed</span></div>
+              </div>
+              <div style="font-size:18px;color:var(--ink3)">›</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:12px;cursor:pointer">
+            <div style="display:flex;gap:12px;align-items:center">
+              <div style="width:48px;height:48px;background:var(--sun-bg);border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <p style="font-size:16px;font-weight:800;color:var(--sun);line-height:1">5</p>
+                <p style="font-size:9px;font-weight:700;color:var(--sun)">APR</p>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:14px;font-weight:700;color:var(--ink)">GTT (Glucose Tolerance)</p>
+                <p style="font-size:12px;color:var(--ink3);margin-top:2px">Pathlab · 7:00 AM (fasting)</p>
+                <div style="display:flex;gap:6px;margin-top:6px"><span class="pill pill-yellow">Lab Test</span></div>
+              </div>
+              <div style="font-size:18px;color:var(--ink3)">›</div>
+            </div>
+          </div>
+
+          <!-- AI reminder -->
+          <div class="alert-card alert-blue" style="margin-bottom:16px">
+            <span style="font-size:20px">🤖</span>
+            <div><p style="font-size:12px;font-weight:700;color:#2B6CB0">Maia Reminder</p><p style="font-size:12px;color:#2C5282;line-height:1.5;margin-top:2px">Your ANC visit reminder will be sent via WhatsApp 48 hours before. No-show prediction active.</p></div>
+          </div>
+
+          <!-- Past appointments -->
+          <div class="sec-hdr" style="margin-top:4px"><h3>Past Visits</h3></div>
+          <div class="card" style="margin-bottom:8px">
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="width:40px;height:40px;background:var(--soft);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <p style="font-size:13px;font-weight:800;color:var(--ink2);line-height:1">28</p>
+                <p style="font-size:9px;font-weight:700;color:var(--ink3)">FEB</p>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:13px;font-weight:700;color:var(--ink)">ANC Visit · 24 Weeks</p>
+                <p style="font-size:11px;color:var(--ink3)">BP: 138/88 · Wt: 70.5 kg · Normal</p>
+              </div>
+              <button onclick="jumpTo('records')" style="font-size:11px;font-weight:700;color:var(--coral);background:var(--coral-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer">Notes</button>
+            </div>
+          </div>
+          <div class="card">
+            <div style="display:flex;gap:10px;align-items:center">
+              <div style="width:40px;height:40px;background:var(--soft);border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+                <p style="font-size:13px;font-weight:800;color:var(--ink2);line-height:1">14</p>
+                <p style="font-size:9px;font-weight:700;color:var(--ink3)">FEB</p>
+              </div>
+              <div style="flex:1">
+                <p style="font-size:13px;font-weight:700;color:var(--ink)">Anomaly Scan (20 Weeks)</p>
+                <p style="font-size:11px;color:var(--ink3)">All organs normal · No structural issues</p>
+              </div>
+              <button onclick="jumpTo('records')" style="font-size:11px;font-weight:700;color:var(--coral);background:var(--coral-light);border:none;border-radius:8px;padding:5px 10px;cursor:pointer">Report</button>
+            </div>
+          </div>
+
+          <div style="margin-top:16px">
+            <button class="btn btn-coral" onclick="jumpTo('book-appt')">＋ Book New Appointment</button>
+          </div>
+        </div>
+
+        <div class="bnav">
+          <div class="bni" onclick="jumpTo('home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+          <div class="bni" onclick="jumpTo('pregnancy')"><div class="bni-icon">🤰</div><div class="bni-label">Journey</div></div>
+          <div class="bni active" onclick="jumpTo('appointments')"><div class="bni-icon">📅</div><div class="bni-label">Appts</div></div>
+          <div class="bni" onclick="jumpTo('records')"><div class="bni-icon">📋</div><div class="bni-label">Records</div></div>
+          <div class="bni" onclick="jumpTo('profile')"><div class="bni-icon">👤</div><div class="bni-label">Me</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: BOOK APPOINTMENT
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-book-appt">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('appointments')">←</button>
+          <span class="tnav-title">Book Appointment</span>
+          <div></div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+          <!-- Step indicators -->
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:20px">
+            <div id="bk-step1-dot" style="width:28px;height:28px;border-radius:50%;background:var(--coral);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">1</div>
+            <div style="flex:1;height:2px;background:var(--border)" id="bk-line1"></div>
+            <div id="bk-step2-dot" style="width:28px;height:28px;border-radius:50%;background:var(--soft);border:2px solid var(--border);color:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">2</div>
+            <div style="flex:1;height:2px;background:var(--border)" id="bk-line2"></div>
+            <div id="bk-step3-dot" style="width:28px;height:28px;border-radius:50%;background:var(--soft);border:2px solid var(--border);color:var(--ink3);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">3</div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:10px;font-weight:600;color:var(--ink3);margin-bottom:20px;padding:0 4px">
+            <span>Visit Type</span><span style="margin-left:40px">Date & Time</span><span>Confirm</span>
+          </div>
+
+          <!-- Step 1: Visit type -->
+          <div id="bk-s1">
+            <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">What type of visit?</p>
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+              <div onclick="selectApptType(this,'ANC Visit')" class="card" style="cursor:pointer;border:2px solid var(--border);padding:14px;display:flex;gap:12px;align-items:center" data-type="anc">
+                <div style="width:44px;height:44px;background:var(--coral-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🤰</div>
+                <div><p style="font-size:14px;font-weight:700;color:var(--ink)">ANC Visit (Routine)</p><p style="font-size:12px;color:var(--ink3)">Regular prenatal check-up</p></div>
+              </div>
+              <div onclick="selectApptType(this,'Follow-up')" class="card" style="cursor:pointer;border:2px solid var(--border);padding:14px;display:flex;gap:12px;align-items:center">
+                <div style="width:44px;height:44px;background:var(--lav-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🔄</div>
+                <div><p style="font-size:14px;font-weight:700;color:var(--ink)">Follow-up</p><p style="font-size:12px;color:var(--ink3)">Review test results or prior visit</p></div>
+              </div>
+              <div onclick="selectApptType(this,'Scan')" class="card" style="cursor:pointer;border:2px solid var(--border);padding:14px;display:flex;gap:12px;align-items:center">
+                <div style="width:44px;height:44px;background:var(--mint-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">📸</div>
+                <div><p style="font-size:14px;font-weight:700;color:var(--ink)">Ultrasound / Scan</p><p style="font-size:12px;color:var(--ink3)">Growth scan, anomaly scan, Doppler</p></div>
+              </div>
+              <div onclick="selectApptType(this,'Emergency')" class="card" style="cursor:pointer;border:2px solid #FFE0E0;background:#FFF5F5;padding:14px;display:flex;gap:12px;align-items:center">
+                <div style="width:44px;height:44px;background:#FFE0E0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🚨</div>
+                <div><p style="font-size:14px;font-weight:700;color:#C0392B">Emergency / Urgent</p><p style="font-size:12px;color:var(--ink3)">Same-day, urgent care needed</p></div>
+              </div>
+            </div>
+
+            <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">Consultation mode?</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+              <div onclick="selectConsultMode(this,'In-person')" class="card-sm" style="text-align:center;cursor:pointer;border:2px solid var(--border)" id="mode-inperson">
+                <p style="font-size:22px;margin-bottom:6px">🏥</p>
+                <p style="font-size:11px;font-weight:700;color:var(--ink)">In-person</p>
+              </div>
+              <div onclick="selectConsultMode(this,'Video')" class="card-sm" style="text-align:center;cursor:pointer;border:2px solid var(--border)" id="mode-video">
+                <p style="font-size:22px;margin-bottom:6px">🎥</p>
+                <p style="font-size:11px;font-weight:700;color:var(--ink)">Video Call</p>
+              </div>
+              <div onclick="selectConsultMode(this,'Chat')" class="card-sm" style="text-align:center;cursor:pointer;border:2px solid var(--border)" id="mode-chat">
+                <p style="font-size:22px;margin-bottom:6px">💬</p>
+                <p style="font-size:11px;font-weight:700;color:var(--ink)">Chat</p>
+              </div>
+            </div>
+
+            <!-- AI slot suggestion -->
+            <div style="background:linear-gradient(135deg,var(--lav-bg),#E0E3F8);border-radius:12px;padding:12px;margin-bottom:20px;display:flex;gap:10px;align-items:center">
+              <span style="font-size:20px">✨</span>
+              <div style="flex:1">
+                <p style="font-size:11px;font-weight:700;color:var(--lav)">AI SLOT OPTIMISER</p>
+                <p style="font-size:12px;color:var(--ink);margin-top:2px">Recommended: <strong>Mar 15, 10:30 AM</strong> — matches your ANC schedule at week 28</p>
+              </div>
+            </div>
+
+            <button class="btn btn-coral" onclick="bkNextStep(2)">Continue →</button>
+          </div>
+
+          <!-- Step 2: Date/time -->
+          <div id="bk-s2" style="display:none">
+            <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">Select a date</p>
+            <div style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);margin-bottom:16px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+                <span style="font-size:13px;font-weight:700;color:var(--ink)">← March 2025 →</span>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;text-align:center">
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Su</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Mo</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Tu</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">We</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Th</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Fr</div>
+                <div style="font-size:10px;font-weight:700;color:var(--ink3);padding:4px">Sa</div>
+                <!-- Row 1 -->
+                <div style="padding:6px;font-size:12px;color:var(--ink3)"></div>
+                <div style="padding:6px;font-size:12px;color:var(--ink3)"></div>
+                <div style="padding:6px;font-size:12px;color:var(--ink3)"></div>
+                <div style="padding:6px;font-size:12px;color:var(--ink3)"></div>
+                <div style="padding:6px;font-size:12px;color:var(--ink3)"></div>
+                <div onclick="selectDate(this,14)" style="padding:6px;font-size:12px;font-weight:700;cursor:pointer;border-radius:8px;background:var(--sun-bg);color:var(--sun)">14</div>
+                <div onclick="selectDate(this,15)" id="cal-15" style="padding:6px;font-size:12px;font-weight:700;cursor:pointer;border-radius:8px;background:var(--coral);color:white">15</div>
+                <!-- Row 2 -->
+                <div onclick="selectDate(this,16)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">16</div>
+                <div onclick="selectDate(this,17)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">17</div>
+                <div onclick="selectDate(this,18)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">18</div>
+                <div onclick="selectDate(this,19)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">19</div>
+                <div onclick="selectDate(this,20)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">20</div>
+                <div onclick="selectDate(this,21)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">21</div>
+                <div onclick="selectDate(this,22)" style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">22</div>
+                <!-- Row 3 -->
+                <div style="padding:6px;font-size:12px;color:var(--ink3)">23</div>
+                <div style="padding:6px;font-size:12px;color:var(--ink3)">24</div>
+                <div style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">25</div>
+                <div style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">26</div>
+                <div style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">27</div>
+                <div style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">28</div>
+                <div style="padding:6px;font-size:12px;cursor:pointer;border-radius:8px">29</div>
+              </div>
+            </div>
+
+            <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">Available slots — Mar 15</p>
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:20px">
+              <div class="slot unavailable">9:00 AM</div>
+              <div class="slot booked" id="slot-1030">10:30 AM ✓</div>
+              <div class="slot" onclick="selectSlot(this)">11:00 AM</div>
+              <div class="slot" onclick="selectSlot(this)">11:30 AM</div>
+              <div class="slot unavailable">2:00 PM</div>
+              <div class="slot" onclick="selectSlot(this)">3:00 PM</div>
+              <div class="slot" onclick="selectSlot(this)">3:30 PM</div>
+              <div class="slot unavailable">4:00 PM</div>
+              <div class="slot" onclick="selectSlot(this)">4:30 PM</div>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-outline" onclick="bkNextStep(1)" style="flex:0.4">← Back</button>
+              <button class="btn btn-coral" onclick="bkNextStep(3)" style="flex:1">Continue →</button>
+            </div>
+          </div>
+
+          <!-- Step 3: Confirm -->
+          <div id="bk-s3" style="display:none">
+            <div class="card-gradient" style="margin-bottom:16px">
+              <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:8px">BOOKING SUMMARY</p>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,.75)">Type</span><span style="font-size:13px;font-weight:700;color:white">ANC Visit (Routine)</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,.75)">Doctor</span><span style="font-size:13px;font-weight:700;color:white">Dr. Anjali Sharma</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,.75)">Date</span><span style="font-size:13px;font-weight:700;color:white">Saturday, Mar 15</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,.75)">Time</span><span style="font-size:13px;font-weight:700;color:white">10:30 AM</span></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:13px;color:rgba(255,255,255,.75)">Mode</span><span style="font-size:13px;font-weight:700;color:white">In-person</span></div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-bottom:16px">
+              <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">Reminders will be sent via</p>
+              <div style="display:flex;gap:8px">
+                <div style="flex:1;background:var(--mint-bg);border-radius:10px;padding:10px;text-align:center">
+                  <p style="font-size:18px">💬</p>
+                  <p style="font-size:11px;font-weight:700;color:var(--mint)">WhatsApp</p>
+                  <p style="font-size:10px;color:var(--ink3)">48 hrs & 2 hrs before</p>
+                </div>
+                <div style="flex:1;background:var(--lav-bg);border-radius:10px;padding:10px;text-align:center">
+                  <p style="font-size:18px">📱</p>
+                  <p style="font-size:11px;font-weight:700;color:var(--lav)">SMS</p>
+                  <p style="font-size:10px;color:var(--ink3)">Day before</p>
+                </div>
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px">
+              <button class="btn btn-outline" onclick="bkNextStep(2)" style="flex:0.4">← Back</button>
+              <button class="btn btn-coral" onclick="confirmBooking()" style="flex:1">Confirm Booking ✓</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: RECORDS
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-records">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('home')">←</button>
+          <span class="tnav-title">Health Records</span>
+          <button class="tnav-action" onclick="jumpTo('upload-doc')">＋</button>
+        </div>
+        <div class="tab-bar">
+          <div class="tab active" id="rectab-all" onclick="switchRecTab('all')">All</div>
+          <div class="tab" id="rectab-labs" onclick="switchRecTab('labs')">Labs</div>
+          <div class="tab" id="rectab-scans" onclick="switchRecTab('scans')">Scans</div>
+          <div class="tab" id="rectab-rx" onclick="switchRecTab('rx')">Prescriptions</div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+          <div class="alert-card alert-blue" style="margin-bottom:14px">
+            <span style="font-size:18px">✨</span>
+            <div><p style="font-size:11px;font-weight:700;color:#2B6CB0">AI OCR Active</p><p style="font-size:11px;color:#2C5282;line-height:1.4;margin-top:1px">Upload a report and Maia will extract values automatically</p></div>
+          </div>
+
+          <div class="doc-card" style="margin-bottom:10px" onclick="showModal('modal-lab-detail')">
+            <div class="doc-icon" style="background:var(--coral-light)">🩸</div>
+            <div style="flex:1">
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">CBC Report</p>
+              <p style="font-size:11px;color:var(--ink3)">Mar 1, 2025 · Pathlab Diagnostics</p>
+              <div style="display:flex;gap:6px;margin-top:5px"><span class="pill pill-yellow">Hb: 10.8 (Low)</span><span class="ai-chip" style="font-size:9px">✦ AI read</span></div>
+            </div>
+            <span style="font-size:18px;color:var(--coral)">›</span>
+          </div>
+
+          <div class="doc-card" style="margin-bottom:10px">
+            <div class="doc-icon" style="background:var(--mint-bg)">📸</div>
+            <div style="flex:1">
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Anomaly Scan Report</p>
+              <p style="font-size:11px;color:var(--ink3)">Feb 14, 2025 · 20 Weeks</p>
+              <div style="display:flex;gap:6px;margin-top:5px"><span class="pill pill-green">Normal</span><span class="ai-chip" style="font-size:9px">✦ AI read</span></div>
+            </div>
+            <span style="font-size:18px;color:var(--coral)">›</span>
+          </div>
+
+          <div class="doc-card" style="margin-bottom:10px">
+            <div class="doc-icon" style="background:var(--lav-bg)">💊</div>
+            <div style="flex:1">
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Prescription — Feb 28</p>
+              <p style="font-size:11px;color:var(--ink3)">Dr. Anjali Sharma · Folic Acid + Iron</p>
+              <div style="display:flex;gap:6px;margin-top:5px"><span class="pill pill-lav">Active</span></div>
+            </div>
+            <span style="font-size:18px;color:var(--coral)">›</span>
+          </div>
+
+          <div class="doc-card" style="margin-bottom:10px">
+            <div class="doc-icon" style="background:var(--sun-bg)">🔬</div>
+            <div style="flex:1">
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Double Marker Test</p>
+              <p style="font-size:11px;color:var(--ink3)">Jan 5, 2025 · 12 Weeks</p>
+              <div style="display:flex;gap:6px;margin-top:5px"><span class="pill pill-green">Low Risk</span></div>
+            </div>
+            <span style="font-size:18px;color:var(--coral)">›</span>
+          </div>
+
+          <button class="btn btn-coral" onclick="jumpTo('upload-doc')" style="margin-top:8px">📤 Upload New Document</button>
+        </div>
+        <div class="bnav">
+          <div class="bni" onclick="jumpTo('home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+          <div class="bni" onclick="jumpTo('pregnancy')"><div class="bni-icon">🤰</div><div class="bni-label">Journey</div></div>
+          <div class="bni" onclick="jumpTo('appointments')"><div class="bni-icon">📅</div><div class="bni-label">Appts</div></div>
+          <div class="bni active" onclick="jumpTo('records')"><div class="bni-icon">📋</div><div class="bni-label">Records</div></div>
+          <div class="bni" onclick="jumpTo('profile')"><div class="bni-icon">👤</div><div class="bni-label">Me</div></div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: UPLOAD DOCUMENT
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-upload-doc">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('records')">←</button>
+          <span class="tnav-title">Upload Document</span>
+          <div></div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+          <!-- Upload zone -->
+          <div id="upload-zone" onclick="simulateUpload()" style="border:2px dashed var(--coral);border-radius:16px;padding:32px 20px;text-align:center;background:var(--coral-bg);cursor:pointer;margin-bottom:16px;transition:.2s">
+            <div style="font-size:48px;margin-bottom:12px">📤</div>
+            <p style="font-family:var(--serif);font-size:18px;color:var(--coral);margin-bottom:6px">Tap to upload</p>
+            <p style="font-size:12px;color:var(--ink3)">Camera, Gallery, or Files<br>PDF, JPG, PNG supported</p>
+          </div>
+
+          <!-- Upload processing (hidden) -->
+          <div id="upload-processing" style="display:none;background:white;border-radius:16px;padding:20px;border:1px solid var(--border);margin-bottom:16px;text-align:center">
+            <div style="font-size:36px;margin-bottom:10px">🔬</div>
+            <p style="font-family:var(--serif);font-size:16px;color:var(--ink);margin-bottom:6px">Maia is reading your report...</p>
+            <div style="height:6px;background:var(--soft);border-radius:4px;overflow:hidden;margin-bottom:8px">
+              <div id="upload-progress-bar" style="height:100%;width:0%;background:var(--coral);border-radius:4px;transition:1s"></div>
+            </div>
+            <p style="font-size:11px;color:var(--ink3)" id="upload-status-text">Scanning document...</p>
+          </div>
+
+          <!-- OCR Result (hidden) -->
+          <div id="upload-result" style="display:none">
+            <div class="alert-card alert-green" style="margin-bottom:14px">
+              <span style="font-size:20px">✅</span>
+              <div><p style="font-size:12px;font-weight:700;color:#276749">OCR Complete · 96% confidence</p><p style="font-size:12px;color:#2F855A;margin-top:2px">Please verify extracted values below</p></div>
+            </div>
+            <div class="card">
+              <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">Extracted Values — CBC Report</p>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <span style="font-size:13px;color:var(--ink)">Haemoglobin</span>
+                  <div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:800;color:var(--ink)">10.8 g/dL</span><span class="pill pill-yellow">Low</span></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <span style="font-size:13px;color:var(--ink)">WBC Count</span>
+                  <div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:800;color:var(--ink)">8,400</span><span class="pill pill-green">Normal</span></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)">
+                  <span style="font-size:13px;color:var(--ink)">Platelets</span>
+                  <div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:800;color:var(--ink)">2.1 lakh</span><span class="pill pill-green">Normal</span></div>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0">
+                  <span style="font-size:13px;color:var(--ink)">MCV</span>
+                  <div style="display:flex;gap:8px;align-items:center"><span style="font-size:14px;font-weight:800;color:var(--ink)">76 fL</span><span class="pill pill-yellow">Low</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="alert-card alert-yellow" style="margin:14px 0">
+              <span style="font-size:18px">⚠️</span>
+              <div><p style="font-size:12px;font-weight:700;color:#7B6000">Maia AI Note</p><p style="font-size:12px;color:#7B6000;line-height:1.5;margin-top:2px">Haemoglobin is below 11 g/dL. This is common in 3rd trimester but worth discussing with Dr. Sharma. Consider iron-rich foods and discuss supplementation.</p></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:10px">
+              <button class="btn btn-coral" onclick="showToast('Report saved to your records!')">✓ Confirm & Save</button>
+            </div>
+            <button class="btn btn-outline" onclick="resetUpload()">Upload Another</button>
+          </div>
+
+          <!-- Upload options -->
+          <div id="upload-options">
+            <p style="font-size:13px;font-weight:700;color:var(--ink3);margin-bottom:12px">OR select document type</p>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <div onclick="simulateUpload()" class="card-sm" style="text-align:center;cursor:pointer"><p style="font-size:24px;margin-bottom:4px">🩸</p><p style="font-size:12px;font-weight:700;color:var(--ink)">Blood Report</p></div>
+              <div onclick="simulateUpload()" class="card-sm" style="text-align:center;cursor:pointer"><p style="font-size:24px;margin-bottom:4px">📸</p><p style="font-size:12px;font-weight:700;color:var(--ink)">Scan / X-ray</p></div>
+              <div onclick="simulateUpload()" class="card-sm" style="text-align:center;cursor:pointer"><p style="font-size:24px;margin-bottom:4px">💊</p><p style="font-size:12px;font-weight:700;color:var(--ink)">Prescription</p></div>
+              <div onclick="simulateUpload()" class="card-sm" style="text-align:center;cursor:pointer"><p style="font-size:24px;margin-bottom:4px">📄</p><p style="font-size:12px;font-weight:700;color:var(--ink)">Other Document</p></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: MAIA AI CHAT
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-chat">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px;background:linear-gradient(135deg,#4F46E5,#7C3AED)">
+          <button class="tnav-back" onclick="jumpTo('home')" style="background:rgba(255,255,255,.2);border:none">←</button>
+          <div style="text-align:center">
+            <p style="font-family:var(--serif);font-size:16px;color:white">Maia AI</p>
+            <p style="font-size:10px;color:rgba(255,255,255,.7)">Your OB/GYN assistant · Available 24/7</p>
+          </div>
+          <div style="width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px">🤖</div>
+        </div>
+
+        <div class="scr" style="padding:16px;background:var(--soft);flex:1" id="chat-messages">
+          <!-- AI intro -->
+          <div class="chat-wrap">
+            <div style="width:32px;height:32px;background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div>
+            <div>
+              <div class="chat-bubble ai">Namaste Priya! 🙏 I'm Maia, your pregnancy assistant.<br><br>I can help with symptom guidance, week-by-week information, and triage support. I'm restricted to OB/GYN topics to keep you safe.<br><br>What's on your mind today?</div>
+              <p class="chat-time">2:30 PM</p>
+              <!-- Quick replies -->
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+                <button onclick="sendChatMsg('I have back pain at 28 weeks')" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;background:white;border:1.5px solid var(--border);cursor:pointer;color:var(--ink)">Back pain</button>
+                <button onclick="sendChatMsg('How many kicks should I feel per day?')" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;background:white;border:1.5px solid var(--border);cursor:pointer;color:var(--ink)">Kick count</button>
+                <button onclick="sendChatMsg('My BP is 148/92 — is that normal?')" style="padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;background:white;border:1.5px solid var(--border);cursor:pointer;color:var(--ink)">BP concern</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="dynamic-chat"></div>
+        </div>
+
+        <!-- Triage result (hidden) -->
+        <div id="triage-result" style="display:none;padding:12px 16px;background:white;border-top:1px solid var(--border)">
+          <div id="triage-box"></div>
+        </div>
+
+        <!-- Chat input -->
+        <div style="padding:10px 12px;background:white;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-shrink:0">
+          <div style="flex:1;display:flex;align-items:center;background:var(--soft);border-radius:24px;padding:10px 14px;border:1.5px solid var(--border);gap:8px">
+            <input type="text" id="chat-input" placeholder="Ask Maia anything..." style="flex:1;border:none;background:transparent;font-family:var(--sans);font-size:13px;outline:none;color:var(--ink)" onkeydown="if(event.key==='Enter'){sendChatMsg()}">
+            <span style="font-size:16px;cursor:pointer">🎤</span>
+          </div>
+          <button onclick="sendChatMsg()" style="width:40px;height:40px;background:linear-gradient(135deg,#4F46E5,#7C3AED);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px">➤</button>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: TELEHEALTH
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-telehealth">
+        <div class="sbar" style="color:white"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div style="position:absolute;inset:0;background:linear-gradient(160deg,#1a2a1a 0%,#0a1a0a 100%);z-index:0"></div>
+        <div style="position:relative;z-index:2;display:flex;flex-direction:column;height:100%">
+          <!-- Video area -->
+          <div style="flex:1;display:flex;align-items:center;justify-content:center;position:relative;padding-top:50px">
+            <!-- Doctor video (main) -->
+            <div style="width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="width:120px;height:120px;background:linear-gradient(135deg,#2D6A4F,#1B4332);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:48px;border:3px solid rgba(255,255,255,.2);margin-bottom:12px">👩‍⚕️</div>
+              <p style="font-family:var(--serif);font-size:18px;color:white">Dr. Anjali Sharma</p>
+              <p style="font-size:12px;color:rgba(255,255,255,.6)">OB/GYN · Connecting...</p>
+              <div style="display:flex;gap:6px;margin-top:8px;align-items:center">
+                <div style="width:6px;height:6px;background:#4ADE80;border-radius:50%;animation:pulse 1.5s infinite"></div>
+                <span style="font-size:12px;color:#4ADE80;font-weight:600">12:34</span>
+              </div>
+            </div>
+            <!-- Self PiP -->
+            <div style="position:absolute;top:16px;right:16px;width:90px;height:120px;background:linear-gradient(135deg,#3A1A1A,#2A0A0A);border-radius:12px;border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:32px;cursor:pointer">🤰<div style="position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9px;color:rgba(255,255,255,.6)">You</div></div>
+          </div>
+
+          <!-- Controls -->
+          <div style="padding:20px;background:rgba(0,0,0,.4);backdrop-filter:blur(10px)">
+            <!-- Status -->
+            <div style="text-align:center;margin-bottom:16px">
+              <p style="font-size:13px;color:rgba(255,255,255,.7)">ANC Consultation · In Progress</p>
+            </div>
+            <!-- Control buttons -->
+            <div style="display:flex;justify-content:center;gap:16px;margin-bottom:16px">
+              <div onclick="showToast('Microphone muted')" style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">🎤</div>
+              <div onclick="showToast('Camera off')" style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">📷</div>
+              <div onclick="showModal('modal-call-notes')" style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">📝</div>
+              <div onclick="jumpTo('chat')" style="width:52px;height:52px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">💬</div>
+              <div onclick="endCall()" style="width:52px;height:52px;background:#E53E3E;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:20px">📞</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: EMERGENCY
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-emergency">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px;background:#FFF5F5;border-color:#FFE0E0">
+          <button class="tnav-back" onclick="jumpTo('home')" style="background:#FFE0E0">←</button>
+          <span class="tnav-title" style="color:#C0392B">🚨 Emergency Help</span>
+          <div></div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:#FFF5F5">
+          <!-- SOS button -->
+          <div style="text-align:center;padding:24px 0 20px">
+            <div onclick="showModal('modal-sos')" style="width:120px;height:120px;background:linear-gradient(135deg,#E53E3E,#C0392B);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto;cursor:pointer;box-shadow:0 8px 32px rgba(229,62,62,.4),0 0 0 12px rgba(229,62,62,.1),0 0 0 24px rgba(229,62,62,.05)">
+              <p style="font-size:32px">🆘</p>
+              <p style="font-size:13px;font-weight:800;color:white">SOS</p>
+            </div>
+            <p style="font-size:12px;color:#C0392B;font-weight:600;margin-top:12px">Tap to alert your doctor & emergency contact</p>
+          </div>
+
+          <!-- Warning signs -->
+          <div class="sec-hdr"><h3 style="color:#C0392B">⚠️ Go to hospital immediately if:</h3></div>
+          <div class="card" style="border-color:#FFD0D0;background:white;margin-bottom:14px">
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">Heavy vaginal bleeding</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">No fetal movement for 12+ hours</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">Severe headache or blurred vision</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">Sudden swelling of face/hands</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">Water breaking (amniotic fluid leak)</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span style="font-size:16px">🔴</span><span style="font-size:13px;font-weight:600;color:var(--ink)">Contractions less than 5 mins apart</span></div>
+            </div>
+          </div>
+
+          <!-- Quick dial -->
+          <div class="sec-hdr"><h3>Quick Contacts</h3></div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+            <div onclick="showToast('Calling Dr. Anjali Sharma...')" style="background:white;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid var(--border)">
+              <div style="width:44px;height:44px;background:var(--coral-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">👩‍⚕️</div>
+              <div style="flex:1"><p style="font-size:14px;font-weight:700;color:var(--ink)">Dr. Anjali Sharma</p><p style="font-size:11px;color:var(--ink3)">Your OB/GYN</p></div>
+              <div style="width:40px;height:40px;background:var(--coral);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:white">📞</div>
+            </div>
+            <div onclick="showToast('Calling Emergency contact...')" style="background:white;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid var(--border)">
+              <div style="width:44px;height:44px;background:var(--lav-bg);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">👨</div>
+              <div style="flex:1"><p style="font-size:14px;font-weight:700;color:var(--ink)">Rahul (Husband)</p><p style="font-size:11px;color:var(--ink3)">Emergency contact</p></div>
+              <div style="width:40px;height:40px;background:var(--lav);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:white">📞</div>
+            </div>
+            <div onclick="showToast('Calling 108 Ambulance...')" style="background:#FFF5F5;border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;cursor:pointer;border:1px solid #FFD0D0">
+              <div style="width:44px;height:44px;background:#FFE0E0;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px">🚑</div>
+              <div style="flex:1"><p style="font-size:14px;font-weight:700;color:#C0392B">Ambulance 108</p><p style="font-size:11px;color:var(--ink3)">National emergency</p></div>
+              <div style="width:40px;height:40px;background:#E53E3E;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;color:white">📞</div>
+            </div>
+          </div>
+
+          <!-- Nearby hospital -->
+          <div class="sec-hdr"><h3>Nearest Hospital</h3></div>
+          <div style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border)">
+            <p style="font-size:14px;font-weight:700;color:var(--ink)">Poona Hospital & Research Centre</p>
+            <p style="font-size:12px;color:var(--ink3);margin-top:2px">2.3 km away · NICU available · OB/GYN on call 24/7</p>
+            <button onclick="showToast('Opening maps...')" class="btn-sm btn-sm-coral" style="margin-top:10px">📍 Navigate</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: ALERTS
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-alerts">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('home')">←</button>
+          <span class="tnav-title">Alerts & Reminders</span>
+          <div></div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+          <div class="alert-card alert-red" style="margin-bottom:10px;cursor:pointer" onclick="jumpTo('records')">
+            <span style="font-size:22px">🩸</span>
+            <div>
+              <p style="font-size:13px;font-weight:700;color:#C0392B">Action Required</p>
+              <p style="font-size:12px;color:#7F1D1D;line-height:1.5;margin-top:2px">Haemoglobin 10.8 g/dL — below 11 g/dL threshold. Discuss iron supplementation with Dr. Sharma at next visit.</p>
+              <button class="btn-sm btn-sm-coral" style="margin-top:8px;background:#FFE0E0;color:#C0392B" onclick="event.stopPropagation();jumpTo('appointments')">Book Follow-up</button>
+            </div>
+          </div>
+
+          <div class="alert-card alert-yellow" style="margin-bottom:10px">
+            <span style="font-size:22px">📅</span>
+            <div>
+              <p style="font-size:13px;font-weight:700;color:#7B6000">Appointment Reminder</p>
+              <p style="font-size:12px;color:#7B6000;line-height:1.5;margin-top:2px">ANC Visit in 2 days — March 15 at 10:30 AM with Dr. Anjali Sharma. Fasting not required.</p>
+            </div>
+          </div>
+
+          <div class="alert-card alert-yellow" style="margin-bottom:10px">
+            <span style="font-size:22px">🔬</span>
+            <div>
+              <p style="font-size:13px;font-weight:700;color:#7B6000">Test Due</p>
+              <p style="font-size:12px;color:#7B6000;line-height:1.5;margin-top:2px">GTT (Glucose Tolerance Test) is due at 28 weeks. Please book through your lab or clinic.</p>
+              <button class="btn-sm btn-sm-olive" style="margin-top:8px" onclick="jumpTo('book-appt')">Book Lab Test</button>
+            </div>
+          </div>
+
+          <div class="alert-card alert-green" style="margin-bottom:10px">
+            <span style="font-size:22px">💊</span>
+            <div>
+              <p style="font-size:13px;font-weight:700;color:#276749">Medication Reminder</p>
+              <p style="font-size:12px;color:#276749;line-height:1.5;margin-top:2px">Folic Acid 5mg — take once daily with food. Iron tablet — take at bedtime (separate from calcium).</p>
+            </div>
+          </div>
+
+          <div class="alert-card alert-blue" style="margin-bottom:10px">
+            <span style="font-size:22px">👶</span>
+            <div>
+              <p style="font-size:13px;font-weight:700;color:#2B6CB0">Kick Tracking</p>
+              <p style="font-size:12px;color:#2C5282;line-height:1.5;margin-top:2px">Count 10 kicks twice daily from week 28. Log in the app. Alert Dr. Sharma if fewer than 10 in 2 hours.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: EDUCATION
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-education">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="topnav" style="padding-top:52px">
+          <button class="tnav-back" onclick="jumpTo('home')">←</button>
+          <span class="tnav-title">Learn & Wellness</span>
+          <div></div>
+        </div>
+        <div class="scr" style="padding:16px;padding-bottom:80px;background:var(--soft)">
+          <!-- Featured -->
+          <div onclick="showModal('modal-article')" style="background:linear-gradient(155deg,var(--coral),#C85A3F);border-radius:20px;padding:20px;margin-bottom:16px;cursor:pointer">
+            <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:6px">WEEK 28 · AI PERSONALISED</p>
+            <p style="font-family:var(--serif);font-size:18px;color:white;margin-bottom:6px">What to expect in your third trimester</p>
+            <p style="font-size:12px;color:rgba(255,255,255,.8);line-height:1.5">Back pain, heartburn, frequent bathroom trips — we cover it all. Plus: preparing your hospital bag.</p>
+            <p style="font-size:12px;color:rgba(255,255,255,.9);font-weight:700;margin-top:10px">Read · 5 min ›</p>
+          </div>
+
+          <div class="sec-hdr"><h3>For You This Week</h3><span class="ai-chip">✦ AI</span></div>
+          <div class="hscroll" style="margin-bottom:16px">
+            <div onclick="showModal('modal-article')" style="width:150px;background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;flex-shrink:0">
+              <div style="height:70px;background:linear-gradient(135deg,var(--mint-bg),var(--mint));display:flex;align-items:center;justify-content:center;font-size:36px">🥗</div>
+              <div style="padding:10px"><p style="font-size:12px;font-weight:700;color:var(--ink)">Iron-rich diet guide</p><p style="font-size:10px;color:var(--ink3);margin-top:2px">3 min read</p></div>
+            </div>
+            <div onclick="showModal('modal-article')" style="width:150px;background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;flex-shrink:0">
+              <div style="height:70px;background:linear-gradient(135deg,var(--lav-bg),var(--lav));display:flex;align-items:center;justify-content:center;font-size:36px">🧘</div>
+              <div style="padding:10px"><p style="font-size:12px;font-weight:700;color:var(--ink)">Prenatal yoga for week 28</p><p style="font-size:10px;color:var(--ink3);margin-top:2px">Video · 12 min</p></div>
+            </div>
+            <div onclick="showModal('modal-article')" style="width:150px;background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;flex-shrink:0">
+              <div style="height:70px;background:linear-gradient(135deg,var(--sun-bg),#F5C842);display:flex;align-items:center;justify-content:center;font-size:36px">💤</div>
+              <div style="padding:10px"><p style="font-size:12px;font-weight:700;color:var(--ink)">Sleep positions in T3</p><p style="font-size:10px;color:var(--ink3);margin-top:2px">4 min read</p></div>
+            </div>
+            <div onclick="showModal('modal-article')" style="width:150px;background:white;border-radius:14px;border:1px solid var(--border);overflow:hidden;cursor:pointer;flex-shrink:0">
+              <div style="height:70px;background:linear-gradient(135deg,var(--coral-light),var(--blush));display:flex;align-items:center;justify-content:center;font-size:36px">🏥</div>
+              <div style="padding:10px"><p style="font-size:12px;font-weight:700;color:var(--ink)">Preparing your hospital bag</p><p style="font-size:10px;color:var(--ink3);margin-top:2px">Checklist</p></div>
+            </div>
+          </div>
+
+          <div class="sec-hdr"><h3>Categories</h3></div>
+          <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+            <div onclick="showModal('modal-article')" style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);cursor:pointer">
+              <p style="font-size:24px;margin-bottom:6px">🥗</p>
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Nutrition & Diet</p>
+              <p style="font-size:11px;color:var(--ink3)">8 articles</p>
+            </div>
+            <div onclick="showModal('modal-article')" style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);cursor:pointer">
+              <p style="font-size:24px;margin-bottom:6px">🧘</p>
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Exercise & Yoga</p>
+              <p style="font-size:11px;color:var(--ink3)">6 videos</p>
+            </div>
+            <div onclick="showModal('modal-article')" style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);cursor:pointer">
+              <p style="font-size:24px;margin-bottom:6px">😌</p>
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Mental Wellness</p>
+              <p style="font-size:11px;color:var(--ink3)">5 articles</p>
+            </div>
+            <div onclick="showModal('modal-article')" style="background:white;border-radius:14px;padding:14px;border:1px solid var(--border);cursor:pointer">
+              <p style="font-size:24px;margin-bottom:6px">🍼</p>
+              <p style="font-size:13px;font-weight:700;color:var(--ink)">Birth Preparation</p>
+              <p style="font-size:11px;color:var(--ink3)">7 guides</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══════════════════════════════════════════
+           SCREEN: PROFILE
+      ══════════════════════════════════════════ -->
+      <div class="screen" id="screen-profile">
+        <div class="sbar"><span>9:41</span><div class="sbar-right">📶 🔋</div></div>
+        <div class="scr" style="background:var(--soft);padding-bottom:80px">
+          <!-- Profile hero -->
+          <div style="background:linear-gradient(160deg,var(--coral) 0%,#C85A3F 100%);padding:60px 20px 32px;text-align:center">
+            <div style="width:72px;height:72px;background:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin:0 auto 12px;border:3px solid rgba(255,255,255,.5)">🤰</div>
+            <p style="font-family:var(--serif);font-size:20px;color:white">Priya Mehta</p>
+            <p style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">🤰 Pregnant · Week 28</p>
+            <div style="display:flex;gap:8px;justify-content:center;margin-top:10px">
+              <span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:white">EDD: Jun 14</span>
+              <span style="background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;color:white">G1P0</span>
+            </div>
+          </div>
+
+          <div style="padding:16px">
+            <!-- Linked clinic -->
+            <div class="card" style="margin-bottom:12px;display:flex;gap:12px;align-items:center">
+              <div style="width:44px;height:44px;background:var(--coral-light);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px">🏥</div>
+              <div style="flex:1">
+                <p style="font-size:13px;font-weight:700;color:var(--ink)">Dr. Anjali Sharma's Clinic</p>
+                <p style="font-size:11px;color:var(--ink3)">FC Road, Pune · Linked ✓</p>
+              </div>
+              <span class="pill pill-green">Active</span>
+            </div>
+
+            <!-- Medical info -->
+            <div class="sec-hdr"><h3>Medical Profile</h3></div>
+            <div class="card" style="margin-bottom:12px">
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">Blood Group</span><span style="font-size:13px;font-weight:700;color:var(--ink)">B+</span></div>
+                <div class="divider"></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">LMP</span><span style="font-size:13px;font-weight:700;color:var(--ink)">Sep 14, 2024</span></div>
+                <div class="divider"></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">EDD</span><span style="font-size:13px;font-weight:700;color:var(--ink)">Jun 14, 2025</span></div>
+                <div class="divider"></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">Gravida / Parity</span><span style="font-size:13px;font-weight:700;color:var(--ink)">G1P0</span></div>
+                <div class="divider"></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">Known Conditions</span><span style="font-size:13px;font-weight:700;color:var(--ink)">None</span></div>
+                <div class="divider"></div>
+                <div style="display:flex;justify-content:space-between"><span style="font-size:12px;color:var(--ink3)">Allergies</span><span style="font-size:13px;font-weight:700;color:var(--ink)">None known</span></div>
+              </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="sec-hdr"><h3>Settings</h3></div>
+            <div class="card" style="margin-bottom:8px">
+              <div style="display:flex;flex-direction:column;gap:0">
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+                  <span style="font-size:13px;color:var(--ink)">🌐 Language</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--coral)">English ›</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+                  <span style="font-size:13px;color:var(--ink)">🔔 Notifications</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--coral)">On ›</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);cursor:pointer">
+                  <span style="font-size:13px;color:var(--ink)">🔒 Privacy</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--coral)">Manage ›</span>
+                </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;cursor:pointer">
+                  <span style="font-size:13px;color:var(--ink)">🔄 Change Journey</span>
+                  <span style="font-size:12px;font-weight:700;color:var(--coral)">Edit ›</span>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="showToast('Logging out...')" class="btn btn-outline" style="margin-top:8px">Sign Out</button>
+          </div>
+        </div>
+        <div class="bnav">
+          <div class="bni" onclick="jumpTo('home')"><div class="bni-icon">🏠</div><div class="bni-label">Home</div></div>
+          <div class="bni" onclick="jumpTo('pregnancy')"><div class="bni-icon">🤰</div><div class="bni-label">Journey</div></div>
+          <div class="bni" onclick="jumpTo('appointments')"><div class="bni-icon">📅</div><div class="bni-label">Appts</div></div>
+          <div class="bni" onclick="jumpTo('records')"><div class="bni-icon">📋</div><div class="bni-label">Records</div></div>
+          <div class="bni active" onclick="jumpTo('profile')"><div class="bni-icon">👤</div><div class="bni-label">Me</div></div>
+        </div>
+      </div>
+
+      <!-- ═══════ MODALS ═══════ -->
+
+      <!-- Modal: AI Alert -->
+      <div class="modal-overlay" id="modal-ai-alert" onclick="closeModal('modal-ai-alert')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:14px;padding:16px;margin-bottom:16px;display:flex;gap:10px;align-items:center">
+            <span style="font-size:24px">✨</span>
+            <div><p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700">MAIA AI · PROACTIVE ALERT</p><p style="font-size:15px;font-weight:700;color:white;margin-top:2px">Blood Pressure Requires Attention</p></div>
+          </div>
+          <p style="font-size:13px;color:var(--ink3);line-height:1.6;margin-bottom:14px">Your BP reading of <strong>148/92 mmHg</strong> from your last visit on Feb 28 falls in the "watch" category. This could be an early sign of gestational hypertension.</p>
+          <div style="background:var(--sun-bg);border-radius:12px;padding:12px;margin-bottom:16px">
+            <p style="font-size:12px;font-weight:700;color:#7B6000;margin-bottom:6px">AI Recommendation</p>
+            <p style="font-size:12px;color:#7B6000;line-height:1.5">Monitor BP daily if possible. Reduce sodium intake. Rest and avoid stress. Alert your doctor immediately if BP exceeds 160/110 or if you experience headache or visual changes.</p>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-outline" onclick="closeModal('modal-ai-alert')" style="flex:0.5">Dismiss</button>
+            <button class="btn btn-coral" onclick="closeModal('modal-ai-alert');jumpTo('appointments')" style="flex:1">Book Follow-up</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: ANC Checklist -->
+      <div class="modal-overlay" id="modal-anc" onclick="closeModal('modal-anc')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <p class="modal-title">ANC Checklist · Week 28</p>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:14px">Standard prenatal checks for your 3rd trimester visit</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--mint-bg);border-radius:10px"><span style="font-size:18px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Blood pressure check</p><p style="font-size:11px;color:var(--ink3)">Completed — Feb 28</p></div></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--mint-bg);border-radius:10px"><span style="font-size:18px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Weight measurement</p><p style="font-size:11px;color:var(--ink3)">72 kg — Feb 28</p></div></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--mint-bg);border-radius:10px"><span style="font-size:18px">✅</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Fundal height</p><p style="font-size:11px;color:var(--ink3)">28 cm — appropriate for dates</p></div></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--sun-bg);border-radius:10px"><span style="font-size:18px">⬜</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">GTT (Glucose Tolerance)</p><p style="font-size:11px;color:#A67A10">Due this week — book at lab</p></div><button onclick="closeModal('modal-anc');jumpTo('book-appt')" class="btn-sm btn-sm-olive" style="margin-left:auto;font-size:10px">Book</button></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--soft);border-radius:10px"><span style="font-size:18px">⬜</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Morphology / Growth scan</p><p style="font-size:11px;color:var(--ink3)">Due at 30 weeks</p></div></div>
+            <div style="display:flex;gap:10px;align-items:center;padding:10px;background:var(--soft);border-radius:10px"><span style="font-size:18px">⬜</span><div><p style="font-size:13px;font-weight:700;color:var(--ink)">Tdap vaccination</p><p style="font-size:11px;color:var(--ink3)">Due at 30–32 weeks</p></div></div>
+          </div>
+          <button class="btn btn-coral" onclick="closeModal('modal-anc')" style="margin-top:20px">Got it</button>
+        </div>
+      </div>
+
+      <!-- Modal: Kick Counter -->
+      <div class="modal-overlay" id="modal-kick" onclick="closeModal('modal-kick')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <p class="modal-title">👶 Kick Counter</p>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:20px">Count 10 kicks twice daily. Tap the baby to log each kick.</p>
+          <div style="text-align:center;margin-bottom:20px">
+            <div id="kick-count" style="font-family:var(--serif);font-size:52px;color:var(--coral);margin-bottom:4px">8</div>
+            <p style="font-size:13px;color:var(--ink3)">kicks today</p>
+          </div>
+          <div onclick="logKick()" style="width:120px;height:120px;background:linear-gradient(135deg,var(--coral),#C85A3F);border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;cursor:pointer;box-shadow:0 8px 24px rgba(224,122,95,.4)">
+            <div style="font-size:48px">👶</div>
+            <p style="font-size:11px;color:rgba(255,255,255,.9);font-weight:700">TAP TO LOG</p>
+          </div>
+          <div style="background:var(--coral-light);border-radius:12px;padding:12px;text-align:center;margin-bottom:16px">
+            <p style="font-size:13px;font-weight:700;color:var(--coral)">✓ Normal range — keep going!</p>
+            <p style="font-size:11px;color:var(--ink3);margin-top:2px">Alert Dr. Sharma if fewer than 10 movements in 2 hours</p>
+          </div>
+          <button class="btn btn-outline" onclick="closeModal('modal-kick')">Close</button>
+        </div>
+      </div>
+
+      <!-- Modal: Appointment Detail -->
+      <div class="modal-overlay" id="modal-appt-detail" onclick="closeModal('modal-appt-detail')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div class="card-gradient" style="margin-bottom:16px">
+            <p style="font-size:11px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:8px">ANC VISIT · 3RD TRIMESTER</p>
+            <div style="display:flex;gap:16px">
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7)">DATE</p><p style="font-size:16px;font-weight:700;color:white">Mar 15</p></div>
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7)">TIME</p><p style="font-size:16px;font-weight:700;color:white">10:30 AM</p></div>
+              <div><p style="font-size:11px;color:rgba(255,255,255,.7)">DOCTOR</p><p style="font-size:16px;font-weight:700;color:white">Dr. Sharma</p></div>
+            </div>
+          </div>
+          <p style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:10px">What to bring</p>
+          <div style="background:var(--soft);border-radius:12px;padding:12px;margin-bottom:16px">
+            <div style="display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;gap:8px;align-items:center"><span>📋</span><span style="font-size:12px;color:var(--ink)">Previous reports & prescriptions</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span>💊</span><span style="font-size:12px;color:var(--ink)">Current medications</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span>📊</span><span style="font-size:12px;color:var(--ink)">Home BP readings (if any)</span></div>
+              <div style="display:flex;gap:8px;align-items:center"><span>👶</span><span style="font-size:12px;color:var(--ink)">Kick count log</span></div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-outline" onclick="closeModal('modal-appt-detail');showModal('modal-reschedule')" style="flex:0.5">Reschedule</button>
+            <button class="btn btn-coral" onclick="closeModal('modal-appt-detail');jumpTo('telehealth')" style="flex:1">Join Video Call</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: Reschedule -->
+      <div class="modal-overlay" id="modal-reschedule" onclick="closeModal('modal-reschedule')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <p class="modal-title">Reschedule Appointment</p>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:16px">Select a new date and time for your ANC visit</p>
+          <div class="alert-card alert-yellow" style="margin-bottom:14px">
+            <span style="font-size:18px">⚠️</span>
+            <div><p style="font-size:12px;color:#7B6000">Cancellations within 24 hours may incur a booking fee. Please reschedule at least 24 hours in advance.</p></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px">
+            <div class="slot" onclick="selectSlot(this)">Mar 17<br><span style="font-size:10px;color:var(--ink3)">9:00 AM</span></div>
+            <div class="slot" onclick="selectSlot(this)">Mar 18<br><span style="font-size:10px;color:var(--ink3)">11:30 AM</span></div>
+            <div class="slot" onclick="selectSlot(this)">Mar 20<br><span style="font-size:10px;color:var(--ink3)">10:00 AM</span></div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-outline" onclick="closeModal('modal-reschedule')" style="flex:0.4">Cancel</button>
+            <button class="btn btn-coral" onclick="closeModal('modal-reschedule');showToast('Appointment rescheduled!')" style="flex:1">Confirm New Time</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: Lab Detail -->
+      <div class="modal-overlay" id="modal-lab-detail" onclick="closeModal('modal-lab-detail')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+            <div class="doc-icon" style="background:var(--coral-light)">🩸</div>
+            <div><p style="font-family:var(--serif);font-size:18px;color:var(--ink)">CBC Report</p><p style="font-size:12px;color:var(--ink3)">Mar 1, 2025 · Pathlab Diagnostics</p></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">Haemoglobin</span><span style="font-weight:700;font-size:13px">10.8 g/dL <span class="pill pill-yellow" style="font-size:10px">Low</span></span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">WBC</span><span style="font-weight:700;font-size:13px">8,400 /µL <span class="pill pill-green" style="font-size:10px">Normal</span></span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="font-size:13px">Platelets</span><span style="font-weight:700;font-size:13px">2.1 lakh <span class="pill pill-green" style="font-size:10px">Normal</span></span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="font-size:13px">MCV</span><span style="font-weight:700;font-size:13px">76 fL <span class="pill pill-yellow" style="font-size:10px">Low</span></span></div>
+          </div>
+          <div style="background:var(--sun-bg);border-radius:12px;padding:12px;margin-bottom:14px">
+            <p style="font-size:11px;font-weight:700;color:#7B6000;margin-bottom:4px">✨ Maia AI Interpretation</p>
+            <p style="font-size:12px;color:#7B6000;line-height:1.5">Low Hb and MCV suggest iron deficiency anaemia — common in pregnancy. Dr. Sharma should review at your next visit. Increase dietary iron and ensure you're taking prescribed supplements.</p>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-outline" onclick="showToast('Shared with Dr. Sharma via WhatsApp')" style="flex:0.5">📤 Share</button>
+            <button class="btn btn-coral" onclick="closeModal('modal-lab-detail');jumpTo('chat')" style="flex:1">Ask Maia</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal: SOS -->
+      <div class="modal-overlay" id="modal-sos" onclick="closeModal('modal-sos')">
+        <div class="modal-sheet" onclick="event.stopPropagation()" style="background:#FFF5F5">
+          <div class="modal-handle" style="background:#FFD0D0"></div>
+          <div style="text-align:center;margin-bottom:16px">
+            <div style="font-size:48px;margin-bottom:8px">🚨</div>
+            <p style="font-family:var(--serif);font-size:20px;color:#C0392B">Emergency Alert</p>
+            <p style="font-size:12px;color:var(--ink3);margin-top:4px">This will notify your doctor and emergency contact with your location</p>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+            <div style="background:white;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center">
+              <span style="font-size:20px">👩‍⚕️</span>
+              <div style="flex:1"><p style="font-size:13px;font-weight:700">Dr. Anjali Sharma</p><p style="font-size:11px;color:var(--ink3)">WhatsApp + call alert</p></div>
+              <span class="pill pill-green">Will notify</span>
+            </div>
+            <div style="background:white;border-radius:12px;padding:12px;display:flex;gap:10px;align-items:center">
+              <span style="font-size:20px">👨</span>
+              <div style="flex:1"><p style="font-size:13px;font-weight:700">Rahul (Husband)</p><p style="font-size:11px;color:var(--ink3)">SMS + call alert</p></div>
+              <span class="pill pill-green">Will notify</span>
+            </div>
+          </div>
+          <button onclick="closeModal('modal-sos');showToast('🚨 Emergency alert sent! Help is on the way.')" style="width:100%;padding:16px;background:#E53E3E;color:white;border:none;border-radius:14px;font-family:var(--sans);font-size:16px;font-weight:800;cursor:pointer">Send Emergency Alert 🚨</button>
+          <button class="btn btn-outline" onclick="closeModal('modal-sos')" style="margin-top:10px">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Modal: Call Notes -->
+      <div class="modal-overlay" id="modal-call-notes" onclick="closeModal('modal-call-notes')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <p class="modal-title">Session Notes</p>
+          <p style="font-size:12px;color:var(--ink3);margin-bottom:12px">Notes taken by Dr. Sharma during your consultation</p>
+          <div class="card-soft" style="margin-bottom:14px">
+            <p style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:8px">Consultation — Mar 15, 2025</p>
+            <p style="font-size:12px;color:var(--ink3);line-height:1.6">BP: 142/88 — improving. Weight: 72 kg — on track. Fetal movement — normal. Discussed iron supplementation increase. GTT ordered.</p>
+            <p style="font-size:13px;font-weight:700;color:var(--ink);margin-top:10px;margin-bottom:4px">Next steps</p>
+            <p style="font-size:12px;color:var(--ink3);line-height:1.5">1. Complete GTT this week<br>2. Start Ferrous Sulphate 200mg BD<br>3. Return in 2 weeks</p>
+          </div>
+          <button class="btn btn-coral" onclick="closeModal('modal-call-notes')">Close</button>
+        </div>
+      </div>
+
+      <!-- Modal: Article -->
+      <div class="modal-overlay" id="modal-article" onclick="closeModal('modal-article')">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+          <div class="modal-handle"></div>
+          <div style="background:linear-gradient(135deg,var(--coral),#C85A3F);border-radius:14px;padding:16px;margin-bottom:14px">
+            <p style="font-size:10px;color:rgba(255,255,255,.75);font-weight:700;margin-bottom:4px">WEEK 28 · NUTRITION</p>
+            <p style="font-family:var(--serif);font-size:18px;color:white">Iron-rich foods for your third trimester</p>
+          </div>
+          <p style="font-size:13px;color:var(--ink3);line-height:1.7;margin-bottom:12px">Your iron needs are at their highest now. Aim for 27mg per day through food and supplements combined. Here are the best sources...</p>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-size:18px">🥩</span><span style="font-size:13px;color:var(--ink)">Lean red meat — highest bioavailable iron</span></div>
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-size:18px">🌿</span><span style="font-size:13px;color:var(--ink)">Spinach, fenugreek leaves, drumstick</span></div>
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-size:18px">🫘</span><span style="font-size:13px;color:var(--ink)">Dal, rajma, chhole — great vegetarian sources</span></div>
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-size:18px">🌰</span><span style="font-size:13px;color:var(--ink)">Sesame seeds (til), pumpkin seeds</span></div>
+            <div style="display:flex;gap:10px;align-items:center"><span style="font-size:18px">🍊</span><span style="font-size:13px;color:var(--ink)">Eat with Vitamin C to boost absorption</span></div>
+          </div>
+          <button class="btn btn-coral" onclick="closeModal('modal-article')">Got it, thanks!</button>
+        </div>
+      </div>
+
+      <!-- Toast -->
+      <div class="toast" id="global-toast">
+        <span id="toast-icon">✅</span>
+        <span id="toast-msg">Done!</span>
+      </div>
+
+    </div><!-- /phone-screen -->
+  </div><!-- /phone-frame -->
+</div><!-- /phone-wrap -->
+
+<style>
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+</style>
+
+<script>
+let currentScreen = 'home';
+const screenMap = {
+  'home':'screen-home',
+  'pregnancy':'screen-pregnancy',
+  'appointments':'screen-appointments',
+  'book-appt':'screen-book-appt',
+  'records':'screen-records',
+  'upload-doc':'screen-upload-doc',
+  'chat':'screen-chat',
+  'telehealth':'screen-telehealth',
+  'emergency':'screen-emergency',
+  'alerts':'screen-alerts',
+  'education':'screen-education',
+  'profile':'screen-profile'
+};
+
+const tabMap = {
+  'home':0,'pregnancy':1,'appointments':2,'book-appt':2,'records':3,
+  'upload-doc':3,'chat':0,'telehealth':0,'emergency':0,'alerts':0,
+  'education':0,'profile':4
+};
+
+function jumpTo(id){
+  // deactivate all
+  Object.values(screenMap).forEach(s=>{
+    const el=document.getElementById(s);
+    if(el){el.classList.remove('active')}
+  });
+  // activate target
+  const target=document.getElementById(screenMap[id]);
+  if(target){target.classList.add('active')}
+  currentScreen=id;
+  // update tab buttons
+  document.querySelectorAll('.stab').forEach(t=>t.classList.remove('active'));
+  const tabButtons=document.querySelectorAll('.stab');
+  const tabIds=['home','pregnancy','appointments','records','chat','book-appt','upload-doc','telehealth','emergency','profile','alerts','education'];
+  const idx=tabIds.indexOf(id);
+  if(idx>=0&&tabButtons[idx])tabButtons[idx].classList.add('active');
+}
+
+function showModal(id){
+  document.getElementById(id).classList.add('open');
+}
+function closeModal(id){
+  document.getElementById(id).classList.remove('open');
+}
+
+let toastTimer;
+function showToast(msg,icon='✅'){
+  const t=document.getElementById('global-toast');
+  document.getElementById('toast-msg').textContent=msg;
+  document.getElementById('toast-icon').textContent=icon;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// Booking steps
+function bkNextStep(step){
+  document.getElementById('bk-s1').style.display='none';
+  document.getElementById('bk-s2').style.display='none';
+  document.getElementById('bk-s3').style.display='none';
+  document.getElementById('bk-s'+step).style.display='block';
+  // Update step dots
+  for(let i=1;i<=3;i++){
+    const dot=document.getElementById('bk-step'+i+'-dot');
+    if(i<step){dot.style.background='var(--coral)';dot.style.color='white';dot.style.border='none'}
+    else if(i===step){dot.style.background='var(--coral)';dot.style.color='white';dot.style.border='none'}
+    else{dot.style.background='var(--soft)';dot.style.color='var(--ink3)';dot.style.border='2px solid var(--border)'}
+  }
+}
+
+function selectApptType(el,type){
+  document.querySelectorAll('[data-type]').forEach(e=>{e.style.borderColor='var(--border)'});
+  el.style.borderColor='var(--coral)';
+}
+function selectConsultMode(el,mode){
+  document.querySelectorAll('[id^=mode-]').forEach(e=>{e.style.borderColor='var(--border)';e.style.background='white'});
+  el.style.borderColor='var(--coral)';el.style.background='var(--coral-light)';
+}
+function selectSlot(el){
+  document.querySelectorAll('.slot:not(.unavailable)').forEach(s=>{s.classList.remove('booked')});
+  el.classList.add('booked');
+}
+function selectDate(el,d){
+  document.querySelectorAll('[onclick^=selectDate]').forEach(e=>{e.style.background='';e.style.color='';e.style.fontWeight=''});
+  el.style.background='var(--coral)';el.style.color='white';el.style.fontWeight='700';
+}
+function confirmBooking(){
+  jumpTo('appointments');
+  setTimeout(()=>showToast('Appointment confirmed! Reminder via WhatsApp.'),300);
+}
+
+// Pregnancy tabs
+function switchPTab(tab){
+  ['overview','weekly','milestones','growth'].forEach(t=>{
+    document.getElementById('ptab-'+t).classList.toggle('active',t===tab);
+    const c=document.getElementById('ptab-'+t+'-content');
+    if(c)c.style.display=t===tab?'block':'none';
+  });
+}
+
+// Records tabs
+function switchRecTab(tab){
+  ['all','labs','scans','rx'].forEach(t=>{
+    document.getElementById('rectab-'+t).classList.toggle('active',t===tab);
+  });
+}
+
+// Chat
+const aiResponses={
+  'back pain':'Back pain is very common at week 28! Your growing uterus shifts your center of gravity forward. **Tips:** Apply warm compress, sleep on left side with pillow between knees, avoid standing long periods. If pain is severe or accompanied by fever, contact Dr. Sharma.',
+  'kicks':'At 28 weeks, aim for 10 movements within 2 hours, twice daily. Track morning (after breakfast) and evening (after dinner) when baby is most active. Alert your doctor if you feel fewer than 10 kicks in 2 hours.',
+  'bp':'⚠️ A BP of 148/92 is elevated. This falls in Stage 1 hypertension range during pregnancy. **This needs medical attention.** Please contact Dr. Anjali Sharma today. Signs to watch: severe headache, blurred vision, upper abdominal pain — if these occur, go to hospital immediately.',
+  'default':'That\'s a great question! Based on your week 28 status, I can provide guidance on pregnancy-related topics. Could you share more details about your concern? I\'m restricted to OB/GYN topics to keep you safe. For any emergency, tap the 🚨 Emergency button.'
+};
+
+let kickCounter=8;
+function logKick(){
+  kickCounter++;
+  document.getElementById('kick-count').textContent=kickCounter;
+  showToast('Kick logged! '+kickCounter+' kicks today 👶');
+}
+
+function sendChatMsg(text){
+  const input=document.getElementById('chat-input');
+  const msg=text||input.value.trim();
+  if(!msg)return;
+  input.value='';
+  const dc=document.getElementById('dynamic-chat');
+  
+  // User bubble
+  const ub=document.createElement('div');
+  ub.className='chat-wrap user';
+  ub.innerHTML=`<div><div class="chat-bubble user">${msg}</div><p class="chat-time" style="text-align:right">Just now</p></div>`;
+  dc.appendChild(ub);
+  dc.scrollTop=dc.scrollHeight;
+  
+  // AI response
+  setTimeout(()=>{
+    let resp=aiResponses['default'];
+    const ml=msg.toLowerCase();
+    if(ml.includes('back'))resp=aiResponses['back pain'];
+    else if(ml.includes('kick'))resp=aiResponses['kicks'];
+    else if(ml.includes('bp')||ml.includes('blood pressure')||ml.includes('148'))resp=aiResponses['bp'];
+    
+    const ab=document.createElement('div');
+    ab.className='chat-wrap';
+    ab.innerHTML=`<div style="width:32px;height:32px;background:linear-gradient(135deg,#4F46E5,#7C3AED);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">🤖</div><div><div class="chat-bubble ai">${resp.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><p class="chat-time">Just now</p></div>`;
+    dc.appendChild(ab);
+    dc.scrollTop=dc.scrollHeight;
+    
+    // Show triage for BP
+    if(ml.includes('bp')||ml.includes('148')){
+      const tr=document.getElementById('triage-result');
+      tr.style.display='block';
+      document.getElementById('triage-box').innerHTML=`<div style="display:flex;gap:8px;align-items:center;padding:8px 0"><div style="width:10px;height:10px;border-radius:50%;background:#E8A820;flex-shrink:0"></div><p style="font-size:12px;font-weight:700;color:#7B6000">Triage: URGENT — Contact Dr. Sharma today</p><button onclick="jumpTo('appointments')" style="margin-left:auto;padding:6px 12px;background:var(--coral);color:white;border:none;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;font-family:var(--sans)">Book Now</button></div>`;
+    }
+  },800);
+}
+
+// Upload simulation
+function simulateUpload(){
+  document.getElementById('upload-zone').style.display='none';
+  document.getElementById('upload-options').style.display='none';
+  document.getElementById('upload-processing').style.display='block';
+  
+  const steps=['Scanning document...','Extracting text...','Running OCR...','Identifying values...','Finalising...'];
+  let step=0;
+  const bar=document.getElementById('upload-progress-bar');
+  const status=document.getElementById('upload-status-text');
+  
+  const interval=setInterval(()=>{
+    step++;
+    bar.style.width=(step*20)+'%';
+    if(step<=steps.length)status.textContent=steps[step-1];
+    if(step>=5){
+      clearInterval(interval);
+      setTimeout(()=>{
+        document.getElementById('upload-processing').style.display='none';
+        document.getElementById('upload-result').style.display='block';
+      },500);
+    }
+  },600);
+}
+function resetUpload(){
+  document.getElementById('upload-zone').style.display='block';
+  document.getElementById('upload-options').style.display='block';
+  document.getElementById('upload-result').style.display='none';
+  document.getElementById('upload-progress-bar').style.width='0%';
+}
+
+function endCall(){
+  jumpTo('appointments');
+  showModal('modal-call-notes');
+}
+
+// Initialize week grid
+(function(){
+  const g=document.getElementById('week-grid');
+  if(!g)return;
+  for(let w=1;w<=40;w++){
+    const b=document.createElement('div');
+    const type=w<28?'done':w===28?'current':'upcoming';
+    b.className='week-bubble '+type;
+    b.innerHTML=`<span class="week-bubble-num">${w}</span><span class="week-bubble-w">wk</span>`;
+    b.onclick=()=>showToast('Week '+w+' selected');
+    g.appendChild(b);
+  }
+})();
+</script>
+</body>
+</html>

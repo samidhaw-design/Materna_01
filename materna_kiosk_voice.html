@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Materna — Smart Kiosk · Voice Agent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --lav:#7B6FD0; --lav-d:#5A4FA8; --lav-l:#EDEAFC; --lav-bg:#F5F3FF;
+  --coral:#E07A5F; --coral-l:#FEE4DC; --coral-d:#C05A40;
+  --sage:#5C7A5E; --sage-l:#E8F4EB;
+  --red:#D93025; --red-l:#FFF0EE;
+  --gold:#C9892A; --gold-l:#FFF0D4;
+  --ink:#1E1E24; --ink2:#3A3A44; --ink3:rgba(30,30,36,.4);
+  --border:rgba(30,30,36,.09); --soft:#FAF8F5;
+  --serif:'DM Serif Display',serif; --sans:'Nunito',sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:#ECEAF5;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:44px 20px 80px}
+
+.ph{text-align:center;margin-bottom:26px}
+.ph h1{font-family:var(--serif);font-size:26px;color:var(--ink);margin-bottom:7px}
+.ph h1 em{color:var(--lav)}
+.ph p{font-size:12px;color:var(--ink3);max-width:520px;margin:0 auto 14px;line-height:1.6}
+.chips{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+.chip{padding:4px 12px;border-radius:20px;font-size:10px;font-weight:800;background:rgba(123,111,208,.12);color:var(--lav-d);border:1px solid rgba(123,111,208,.2)}
+
+/* Flow nav */
+.fnav{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:28px;flex-wrap:wrap}
+.fn{display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+.fd{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;transition:.2s;border:2px solid transparent}
+.fd.act{background:var(--lav);color:#fff;box-shadow:0 4px 14px rgba(123,111,208,.4)}
+.fd.done{background:var(--lav-l);color:var(--lav-d)}
+.fd.pend{background:#E8E4F4;color:#9E9ABB}
+.fl{font-size:9px;font-weight:700;color:var(--ink3);text-align:center;max-width:50px;line-height:1.3}
+.fl.a{color:var(--lav-d)}
+.farr{color:#C0BAD8;font-size:13px;margin-bottom:15px}
+
+/* Standee shell */
+.sw{display:flex;flex-direction:column;align-items:center}
+.sf{width:360px;background:linear-gradient(170deg,#DDDBE8 0%,#C9C7D6 100%);border-radius:22px 22px 6px 6px;padding:8px 8px 10px;box-shadow:0 0 0 1px rgba(255,255,255,.6),0 28px 80px rgba(123,111,208,.22),0 8px 20px rgba(0,0,0,.1)}
+.cb{height:24px;background:linear-gradient(180deg,#BCBACE,#C6C4D4);border-radius:15px 15px 0 0;margin-bottom:5px;display:flex;align-items:center;justify-content:center;gap:10px}
+.cl{width:10px;height:10px;border-radius:50%;background:#3A3858;border:2px solid #4A4870;position:relative}
+.cl::after{content:'';position:absolute;inset:2px;border-radius:50%;background:#1A1830}
+.cir{width:6px;height:6px;border-radius:50%;background:#5A3870}
+.mg{display:flex;gap:2px}.mc{width:2px;height:7px;border-radius:2px;background:rgba(40,35,70,.28)}
+.ks{width:100%;aspect-ratio:9/16;border-radius:10px;overflow:hidden;position:relative;background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}
+.bn{width:24px;height:30px;background:linear-gradient(180deg,#C6C4D4,#B2B0C0);margin:0 auto}
+.bf{width:190px;height:20px;background:linear-gradient(170deg,#DDDBE8,#C9C7D6);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.1),0 0 0 1px rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;margin:0 auto}
+.bbrand{font-size:8px;font-weight:900;color:rgba(80,70,140,.32);letter-spacing:2.5px;text-transform:uppercase}
+
+.slabel{text-align:center;margin-top:14px}
+.ss{font-size:9px;font-weight:800;color:var(--ink3);text-transform:uppercase;letter-spacing:.8px;margin-bottom:3px}
+.st{font-family:var(--serif);font-size:14px;color:var(--ink)}
+
+/* Screen inner */
+.scr{position:absolute;inset:0;font-family:var(--sans);overflow:hidden;background:#fff}
+.scr *{box-sizing:border-box}
+
+/* Kiosk top bar */
+.ktb{height:34px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 13px;flex-shrink:0}
+.kbn{display:flex;align-items:center;gap:5px}
+.kbd{width:15px;height:15px;background:linear-gradient(135deg,var(--lav),var(--coral));border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px}
+.kbnt{font-family:var(--serif);font-size:11px;color:var(--ink)}
+
+/* Voice Agent visual — the core new element */
+.va-band{
+  background:linear-gradient(135deg,#F0EEF8 0%,#E8E4F4 100%);
+  border-bottom:1px solid rgba(123,111,208,.12);
+  padding:10px 13px;
+  display:flex;align-items:center;gap:10px;
+  flex-shrink:0;
+}
+/* Maia avatar with live waveform ring */
+.va-avatar{
+  position:relative;width:44px;height:44px;flex-shrink:0;
+}
+.va-ring{
+  position:absolute;inset:0;border-radius:50%;
+  border:2px solid rgba(123,111,208,.25);
+}
+.va-ring.talking{
+  animation:ringpulse 1.2s ease-in-out infinite;
+  border-color:var(--lav);
+}
+.va-ring.listening{
+  animation:ringlisten 0.8s ease-in-out infinite;
+  border-color:var(--coral);
+}
+.va-inner{
+  position:absolute;inset:6px;
+  background:linear-gradient(135deg,var(--lav),var(--lav-d));
+  border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+
+/* Sound wave bars */
+.wave-bars{display:flex;gap:2px;align-items:center;height:20px}
+.wb{width:3px;border-radius:3px;background:var(--lav);transform-origin:bottom}
+.wb.t1{animation:wb1 0.6s ease-in-out infinite}
+.wb.t2{animation:wb2 0.6s ease-in-out infinite 0.1s}
+.wb.t3{animation:wb3 0.6s ease-in-out infinite 0.2s}
+.wb.t4{animation:wb4 0.6s ease-in-out infinite 0.3s}
+.wb.t5{animation:wb5 0.6s ease-in-out infinite 0.4s}
+.wb.t6{animation:wb1 0.6s ease-in-out infinite 0.15s}
+.wb.t7{animation:wb3 0.6s ease-in-out infinite 0.25s}
+.wb.idle{animation:none;height:4px!important;opacity:.3}
+.wb.listen{background:var(--coral)}
+
+/* Transcript bubble */
+.va-speech{flex:1}
+.va-label{font-size:8px;font-weight:800;color:var(--lav);letter-spacing:.4px;margin-bottom:3px}
+.va-text{font-size:11px;color:var(--ink);font-weight:600;line-height:1.4}
+.va-state{font-size:9px;color:var(--ink3);margin-top:2px;display:flex;align-items:center;gap:4px}
+.state-dot{width:5px;height:5px;border-radius:50%}
+
+/* Big buttons */
+.bb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:5px;border:none;cursor:pointer;border-radius:14px;font-family:var(--sans);font-weight:800;transition:.12s;width:100%}
+.bb:active{transform:scale(.97)}
+.bbl{background:var(--lav);color:#fff}
+.bbl:hover{background:var(--lav-d)}
+.bbs{background:var(--soft);color:var(--ink);border:1.5px solid var(--border)}
+.bbs:hover{border-color:var(--lav);color:var(--lav)}
+.bbg{background:var(--sage);color:#fff}
+.bbr{background:var(--red);color:#fff}
+.bbc{background:var(--coral);color:#fff}
+
+/* Quick tap chips */
+.qtc{padding:8px 12px;border-radius:20px;font-size:11px;font-weight:700;background:#fff;border:1.5px solid var(--border);cursor:pointer;font-family:var(--sans);color:var(--ink);white-space:nowrap;flex-shrink:0}
+.qtc:hover{border-color:var(--lav);color:var(--lav)}
+
+/* Chat bubbles */
+.cb-ai{background:var(--lav-bg);border-radius:12px 12px 12px 3px;padding:10px 13px;font-size:12px;color:var(--ink);line-height:1.5;border:1px solid var(--lav-l)}
+.cb-user{background:var(--lav);border-radius:12px 12px 3px 12px;padding:10px 13px;font-size:12px;color:#fff;line-height:1.5;align-self:flex-end;max-width:80%}
+
+/* Animations */
+@keyframes ringpulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+@keyframes ringlisten{0%,100%{transform:scale(1.05);opacity:.7}50%{transform:scale(1.2);opacity:1}}
+@keyframes wb1{0%,100%{height:6px}50%{height:16px}}
+@keyframes wb2{0%,100%{height:10px}50%{height:20px}}
+@keyframes wb3{0%,100%{height:8px}50%{height:14px}}
+@keyframes wb4{0%,100%{height:14px}50%{height:6px}}
+@keyframes wb5{0%,100%{height:5px}50%{height:18px}}
+@keyframes scanLine{0%,100%{top:15px;opacity:.7}50%{top:165px;opacity:1}}
+@keyframes ringp{0%,100%{transform:scale(1);opacity:.4}50%{transform:scale(1.1);opacity:.8}}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.15}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tick{0%{stroke-dashoffset:113}100%{stroke-dashoffset:0}}
+</style>
+</head>
+<body>
+
+<div class="ph">
+  <h1>Materna — Smart Kiosk <em>with Voice Agent</em> 🎤</h1>
+  <p>Maia greets every patient by voice · Two-way spoken conversation · Touch as backup · Light mode · Big buttons · Simple flow</p>
+  <div class="chips">
+    <span class="chip">🎤 Voice-first · Maia speaks first</span>
+    <span class="chip">👂 Two-way conversation</span>
+    <span class="chip">👆 Touch always available</span>
+    <span class="chip">🌸 Light mode · Large touch targets</span>
+    <span class="chip">SOW §6</span>
+  </div>
+</div>
+
+<!-- Flow nav -->
+<div class="fnav" id="fnav">
+  <div class="fn" onclick="go(0)"><div class="fd act" id="fd0">1</div><div class="fl a" id="fl0">Welcome</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(1)"><div class="fd pend" id="fd1">2</div><div class="fl" id="fl1">Scanning</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(2)"><div class="fd pend" id="fd2">3</div><div class="fl" id="fl2">Hello!</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(3)"><div class="fd pend" id="fd3">4</div><div class="fl" id="fl3">Confirmed</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(4)"><div class="fd pend" id="fd4">5</div><div class="fl" id="fl4">Conversation</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(5)"><div class="fd pend" id="fd5">6</div><div class="fl" id="fl5">Queue</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(6)"><div class="fd pend" id="fd6">7</div><div class="fl" id="fl6">Manual</div></div>
+  <div class="farr">›</div>
+  <div class="fn" onclick="go(7)"><div class="fd pend" id="fd7">8</div><div class="fl" id="fl7">Not Found</div></div>
+</div>
+
+<!-- SINGLE NAVIGABLE STANDEE -->
+<div class="sw">
+  <div class="sf">
+    <div class="cb">
+      <div class="cir"></div>
+      <div class="cl"></div>
+      <div class="mg"><div class="mc"></div><div class="mc"></div><div class="mc"></div><div class="mc"></div><div class="mc"></div></div>
+      <div class="cl"></div>
+      <div class="cir"></div>
+    </div>
+    <div class="ks" id="ks"></div>
+  </div>
+  <div class="bn"></div>
+  <div class="bf"><span class="bbrand">Materna</span></div>
+</div>
+
+<div class="slabel">
+  <div class="ss" id="ss"></div>
+  <div class="st" id="st"></div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SCREEN DEFINITIONS
+═══════════════════════════════════════ -->
+<script>
+const S = [
+
+// ━━ 0: WELCOME — Maia speaks first ━━
+{ss:'Screen 1 · Welcome', st:'🌸 Maia Greets You',
+h:`<div class="scr" style="display:flex;flex-direction:column;background:#FAFAFE">
+  <!-- Top bar -->
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:9px;font-weight:800;color:var(--sage)">
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--sage);animation:blink 2s infinite"></div>Clinic Open
+    </div>
+  </div>
+
+  <!-- Voice agent band — MAIA SPEAKING -->
+  <div class="va-band">
+    <div class="va-avatar">
+      <div class="va-ring talking"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label">MAIA · SPEAKING</div>
+      <div class="va-text">"Namaste! Welcome to the clinic. I can see you — shall I check you in?"</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t1" style="height:8px"></div>
+          <div class="wb t2" style="height:14px"></div>
+          <div class="wb t3" style="height:10px"></div>
+          <div class="wb t4" style="height:16px"></div>
+          <div class="wb t5" style="height:9px"></div>
+          <div class="wb t6" style="height:13px"></div>
+          <div class="wb t7" style="height:11px"></div>
+        </div>
+        <span style="font-size:8px;color:var(--lav);font-weight:700;margin-left:4px">Speaking aloud via speaker</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content -->
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px 16px;gap:12px">
+
+    <!-- Animated camera ring -->
+    <div style="position:relative;width:96px;height:96px">
+      <div style="position:absolute;inset:0;border-radius:50%;background:var(--lav-bg);animation:ringp 3s infinite"></div>
+      <div style="position:absolute;inset:12px;border-radius:50%;background:var(--lav-l);animation:ringp 3s infinite .5s"></div>
+      <div style="position:absolute;inset:22px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:26px">👋</div>
+    </div>
+
+    <div style="text-align:center">
+      <p style="font-family:var(--serif);font-size:24px;color:var(--ink);margin-bottom:5px">Welcome!</p>
+      <p style="font-size:12px;color:var(--ink3)">Dr. Pallavi Mathur's Clinic</p>
+    </div>
+
+    <!-- Cam viewfinder hint -->
+    <div style="width:150px;height:80px;border-radius:12px;border:2.5px dashed rgba(123,111,208,.28);background:rgba(123,111,208,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;position:relative;overflow:hidden">
+      <div style="position:absolute;left:8px;right:8px;height:2px;background:linear-gradient(90deg,transparent,var(--lav),transparent);animation:scanLine 2.5s ease-in-out infinite"></div>
+      <div style="font-size:24px">📷</div>
+      <p style="font-size:9px;font-weight:700;color:var(--lav)">Detecting you...</p>
+    </div>
+
+    <!-- Respond with voice OR touch -->
+    <p style="font-size:11px;color:var(--ink3);text-align:center;font-weight:600">Say <strong style="color:var(--lav)">"Yes, check me in"</strong> or tap below</p>
+
+    <!-- Two big buttons -->
+    <div style="width:100%;display:flex;flex-direction:column;gap:9px">
+      <button class="bb bbl" onclick="go(1)" style="padding:18px;font-size:15px">
+        <span style="font-size:26px">🤳</span><span>Yes, Check Me In</span>
+      </button>
+      <button class="bb bbs" onclick="go(6)" style="padding:15px;font-size:13px">
+        <span style="font-size:22px">✋</span><span>Use Phone Number Instead</span>
+      </button>
+    </div>
+
+    <button onclick="go(4)" style="background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:11px;color:var(--lav);font-weight:700">💬 Ask Maia something else</button>
+  </div>
+
+  <!-- Bottom strip -->
+  <div style="background:#fff;border-top:1px solid var(--border);padding:8px 16px;display:flex;justify-content:space-around">
+    <div style="text-align:center"><p style="font-size:17px;font-weight:900;color:var(--lav)">4</p><p style="font-size:8px;color:var(--ink3);font-weight:700">WAITING</p></div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center"><p style="font-size:17px;font-weight:900;color:var(--ink)">~12 min</p><p style="font-size:8px;color:var(--ink3);font-weight:700">AVG WAIT</p></div>
+    <div style="width:1px;background:var(--border)"></div>
+    <div style="text-align:center"><p style="font-size:17px;font-weight:900;color:var(--sage)">Open</p><p style="font-size:8px;color:var(--ink3);font-weight:700">CLINIC</p></div>
+  </div>
+  <div style="display:flex;justify-content:center;gap:8px;padding:7px 0;background:#fff;border-top:1px solid var(--border)">
+    <button style="background:var(--lav);color:#fff;border:none;border-radius:20px;padding:4px 11px;font-size:9px;font-weight:800;font-family:var(--sans);cursor:pointer">English</button>
+    <button style="background:#fff;color:var(--ink3);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:9px;font-weight:700;font-family:var(--sans);cursor:pointer">हिन्दी</button>
+    <button style="background:#fff;color:var(--ink3);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:9px;font-weight:700;font-family:var(--sans);cursor:pointer">मराठी</button>
+  </div>
+</div>`},
+
+// ━━ 1: FACE SCANNING ━━
+{ss:'Screen 2 · Scanning', st:'📷 Maia Looking',
+h:`<div class="scr" style="background:#F8F6FF;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <button onclick="go(0)" style="background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--ink3);font-family:var(--sans)">← Back</button>
+  </div>
+
+  <!-- Voice band — Maia speaking while scanning -->
+  <div class="va-band">
+    <div class="va-avatar">
+      <div class="va-ring talking"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label">MAIA · SPEAKING</div>
+      <div class="va-text">"Please look at the camera. Keep still for just a moment!"</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t2" style="height:12px"></div>
+          <div class="wb t4" style="height:18px"></div>
+          <div class="wb t1" style="height:9px"></div>
+          <div class="wb t3" style="height:14px"></div>
+          <div class="wb t5" style="height:10px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px">
+
+    <div style="font-family:var(--serif);font-size:20px;color:var(--ink);text-align:center">Look at the camera</div>
+    <p style="font-size:11px;color:var(--ink3);text-align:center">Stay still · Glasses are fine</p>
+
+    <!-- Large viewfinder -->
+    <div style="width:190px;height:215px;position:relative">
+      <div style="position:absolute;top:0;left:0;width:26px;height:26px;border-top:4px solid var(--lav);border-left:4px solid var(--lav);border-radius:4px 0 0 0"></div>
+      <div style="position:absolute;top:0;right:0;width:26px;height:26px;border-top:4px solid var(--lav);border-right:4px solid var(--lav);border-radius:0 4px 0 0"></div>
+      <div style="position:absolute;bottom:0;left:0;width:26px;height:26px;border-bottom:4px solid var(--lav);border-left:4px solid var(--lav);border-radius:0 0 0 4px"></div>
+      <div style="position:absolute;bottom:0;right:0;width:26px;height:26px;border-bottom:4px solid var(--lav);border-right:4px solid var(--lav);border-radius:0 0 4px 0"></div>
+      <div style="position:absolute;left:6px;right:6px;height:2.5px;background:linear-gradient(90deg,transparent,var(--lav),transparent);animation:scanLine 2s ease-in-out infinite;top:15px"></div>
+      <div style="position:absolute;inset:22px;border-radius:50%;border:2px solid rgba(123,111,208,.3);display:flex;align-items:center;justify-content:center">
+        <div style="font-size:60px;opacity:.3">🧑</div>
+      </div>
+    </div>
+
+    <!-- Scanning pulse -->
+    <div style="background:var(--lav-l);border-radius:30px;padding:10px 20px;display:flex;align-items:center;gap:8px">
+      <div style="width:8px;height:8px;border-radius:50%;background:var(--lav);animation:blink 1s infinite"></div>
+      <p style="font-size:13px;font-weight:800;color:var(--lav-d)">Scanning...</p>
+    </div>
+  </div>
+
+  <div style="padding:11px 14px;border-top:1px solid var(--border)">
+    <button class="bb bbs" onclick="go(7)" style="padding:14px;font-size:13px">
+      <span style="font-size:20px">❓</span><span>Not working? Tap here</span>
+    </button>
+  </div>
+</div>`},
+
+// ━━ 2: RECOGNISED — Maia greets by name ━━
+{ss:'Screen 3 · Recognised', st:'😊 Maia Says Hello',
+h:`<div class="scr" style="background:#fff;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <div style="display:flex;align-items:center;gap:4px;font-size:9px;font-weight:800;color:var(--sage)">
+      <div style="width:7px;height:7px;border-radius:50%;background:var(--sage)"></div>Recognised
+    </div>
+  </div>
+
+  <!-- Voice band — Maia greeting by name -->
+  <div class="va-band" style="background:linear-gradient(135deg,#EEF8EE,#E8F4E8);border-bottom-color:rgba(92,122,94,.15)">
+    <div class="va-avatar">
+      <div class="va-ring talking" style="border-color:var(--sage)"></div>
+      <div class="va-inner" style="background:linear-gradient(135deg,var(--sage),#3D6E45)">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label" style="color:var(--sage)">MAIA · SPEAKING</div>
+      <div class="va-text">"Hello Meera! Great to see you 😊 Your appointment with Dr. Mathur is at 10:30. Shall I check you in?"</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t1" style="height:9px;background:var(--sage)"></div>
+          <div class="wb t2" style="height:15px;background:var(--sage)"></div>
+          <div class="wb t3" style="height:11px;background:var(--sage)"></div>
+          <div class="wb t4" style="height:17px;background:var(--sage)"></div>
+          <div class="wb t5" style="height:8px;background:var(--sage)"></div>
+          <div class="wb t6" style="height:13px;background:var(--sage)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:12px">
+
+    <!-- Avatar -->
+    <div style="position:relative">
+      <div style="width:74px;height:74px;background:linear-gradient(135deg,#F2D9D0,#E07A5F);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:32px;border:3px solid #fff;box-shadow:0 4px 20px rgba(224,122,95,.25)">🤰</div>
+      <div style="position:absolute;bottom:0;right:0;width:22px;height:22px;background:var(--sage);border-radius:50%;border:2.5px solid #fff;display:flex;align-items:center;justify-content:center;font-size:10px">✓</div>
+    </div>
+
+    <div style="text-align:center">
+      <p style="font-family:var(--serif);font-size:26px;color:var(--ink);margin-bottom:4px">Hello, Meera! 👋</p>
+      <p style="font-size:11px;color:var(--ink3)">Week 32 · ANC Visit today</p>
+    </div>
+
+    <!-- Appointment summary -->
+    <div style="width:100%;background:var(--lav-bg);border-radius:14px;border:2px solid var(--lav-l);padding:13px">
+      <p style="font-size:9px;font-weight:800;color:var(--lav);letter-spacing:.5px;margin-bottom:9px">YOUR APPOINTMENT</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div style="background:#fff;border-radius:10px;padding:9px;text-align:center">
+          <p style="font-size:9px;color:var(--ink3);font-weight:700;margin-bottom:2px">DOCTOR</p>
+          <p style="font-size:11px;font-weight:800;color:var(--ink)">Dr. Pallavi Mathur</p>
+        </div>
+        <div style="background:#fff;border-radius:10px;padding:9px;text-align:center">
+          <p style="font-size:9px;color:var(--ink3);font-weight:700;margin-bottom:2px">TIME</p>
+          <p style="font-size:11px;font-weight:800;color:var(--ink)">10:30 AM</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Queue -->
+    <div style="width:100%;background:var(--soft);border-radius:14px;padding:11px;display:flex;justify-content:space-around;border:1px solid var(--border)">
+      <div style="text-align:center"><p style="font-family:var(--serif);font-size:28px;color:var(--lav)">#3</p><p style="font-size:8px;color:var(--ink3);font-weight:700">IN QUEUE</p></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><p style="font-family:var(--serif);font-size:28px;color:var(--ink)">~8 min</p><p style="font-size:8px;color:var(--ink3);font-weight:700">WAIT</p></div>
+    </div>
+
+    <!-- CTA — voice prompt reinforced -->
+    <p style="font-size:11px;color:var(--ink3);text-align:center;font-weight:600">Say <strong style="color:var(--lav)">"Yes"</strong> or tap the button</p>
+    <button class="bb bbl" onclick="go(3)" style="padding:20px;font-size:16px;width:100%">
+      <span style="font-size:28px">✅</span><span>Yes, Check Me In!</span>
+    </button>
+    <button onclick="go(6)" style="background:none;border:none;cursor:pointer;font-family:var(--sans);font-size:11px;color:var(--ink3);font-weight:700">Not you? Tap here</button>
+  </div>
+</div>`},
+
+// ━━ 3: CHECK-IN CONFIRMED ━━
+{ss:'Screen 4 · Confirmed', st:'🎉 Checked In!',
+h:`<div class="scr" style="background:#fff;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <span style="background:var(--sage-l);color:var(--sage);font-size:9px;font-weight:800;padding:3px 9px;border-radius:8px">✓ Checked In</span>
+  </div>
+
+  <!-- Maia announces queue position -->
+  <div class="va-band" style="background:linear-gradient(135deg,#EEF8EE,#E8F4E8);border-bottom-color:rgba(92,122,94,.15)">
+    <div class="va-avatar">
+      <div class="va-ring talking" style="border-color:var(--sage)"></div>
+      <div class="va-inner" style="background:linear-gradient(135deg,var(--sage),#3D6E45)">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label" style="color:var(--sage)">MAIA · SPEAKING</div>
+      <div class="va-text">"You're checked in! You're number 3 in the queue — about 8 minutes. Please take a seat!"</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t2" style="height:14px;background:var(--sage)"></div>
+          <div class="wb t4" style="height:10px;background:var(--sage)"></div>
+          <div class="wb t1" style="height:18px;background:var(--sage)"></div>
+          <div class="wb t3" style="height:12px;background:var(--sage)"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:13px">
+
+    <!-- Success ring -->
+    <div style="position:relative;width:84px;height:84px">
+      <div style="position:absolute;inset:0;border-radius:50%;background:rgba(92,122,94,.07);animation:ringp 2.5s infinite"></div>
+      <div style="position:absolute;inset:10px;background:linear-gradient(135deg,var(--sage),#3D6E45);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px">✅</div>
+    </div>
+
+    <div style="text-align:center">
+      <p style="font-family:var(--serif);font-size:26px;color:var(--ink);margin-bottom:5px">You're all set!</p>
+      <p style="font-size:12px;color:var(--ink3)">Dr. Mathur knows you're here.</p>
+    </div>
+
+    <!-- Big queue number -->
+    <div style="background:var(--lav-bg);border-radius:18px;width:100%;padding:16px;text-align:center;border:2px solid var(--lav-l)">
+      <p style="font-size:9px;font-weight:800;color:var(--lav);letter-spacing:.5px;margin-bottom:3px">YOUR NUMBER</p>
+      <p style="font-family:var(--serif);font-size:58px;color:var(--lav);line-height:1">#3</p>
+      <p style="font-size:11px;color:var(--ink3);margin-top:3px">~8 min · Est. 10:38 AM</p>
+    </div>
+
+    <!-- SMS sent -->
+    <div style="background:var(--sage-l);border-radius:12px;padding:11px 14px;width:100%;display:flex;gap:10px;align-items:center">
+      <span style="font-size:22px">📱</span>
+      <div><p style="font-size:13px;font-weight:800;color:var(--sage)">SMS Sent!</p><p style="font-size:10px;color:var(--sage);margin-top:1px">We'll text you when it's your turn.</p></div>
+      <span style="font-size:16px;color:var(--sage);font-weight:900;margin-left:auto">✓</span>
+    </div>
+
+    <div style="width:100%;display:flex;gap:9px">
+      <button class="bb bbs" onclick="go(5)" style="flex:1;padding:13px;font-size:12px"><span style="font-size:18px">📋</span><span>See Queue</span></button>
+      <button class="bb bbs" onclick="go(4)" style="flex:1;padding:13px;font-size:12px"><span style="font-size:18px">💬</span><span>Ask Maia</span></button>
+    </div>
+  </div>
+</div>`},
+
+// ━━ 4: LIVE VOICE CONVERSATION ━━
+{ss:'Screen 5 · Conversation', st:'🎤 Live Voice Chat',
+h:`<div class="scr" style="background:#FAFAFE;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <button onclick="go(0)" style="background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--ink3);font-family:var(--sans)">← Back</button>
+  </div>
+
+  <!-- Maia header — shows voice state -->
+  <div style="background:linear-gradient(135deg,var(--lav-bg),#EDE8FF);padding:12px 14px;border-bottom:1px solid var(--lav-l);display:flex;gap:10px;align-items:center;flex-shrink:0">
+    <div style="position:relative;width:42px;height:42px;flex-shrink:0">
+      <div class="va-ring talking"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div style="flex:1">
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px">
+        <p style="font-size:13px;font-weight:800;color:var(--lav-d)">Maia</p>
+        <span style="background:var(--lav-l);color:var(--lav-d);font-size:8px;font-weight:800;padding:2px 7px;border-radius:8px">Speaking</span>
+      </div>
+      <div style="display:flex;gap:2.5px;align-items:center">
+        <div class="wb t1" style="height:8px"></div>
+        <div class="wb t2" style="height:13px"></div>
+        <div class="wb t3" style="height:9px"></div>
+        <div class="wb t4" style="height:15px"></div>
+        <div class="wb t5" style="height:8px"></div>
+        <div class="wb t6" style="height:12px"></div>
+        <div class="wb t7" style="height:10px"></div>
+        <p style="font-size:9px;color:var(--lav);font-weight:700;margin-left:5px">Voice active · Speaker on</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conversation transcript -->
+  <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;overflow-y:auto">
+
+    <!-- Maia opens -->
+    <div style="display:flex;gap:7px;align-items:flex-start">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🤖</div>
+      <div class="cb-ai" style="max-width:82%">
+        Hi! I'm Maia. 😊 How can I help you today?
+        <div style="margin-top:6px;display:flex;gap:2px;align-items:center">
+          <div class="wb t1" style="height:6px"></div>
+          <div class="wb t2" style="height:10px"></div>
+          <div class="wb t3" style="height:7px"></div>
+          <div class="wb t4" style="height:9px"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- User speaks — transcript shown -->
+    <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:6px">
+      <div style="font-size:8px;color:var(--ink3);font-weight:700;display:flex;align-items:center;gap:3px">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--coral)"></div>You said
+      </div>
+      <div class="cb-user">"Where is the washroom?"</div>
+    </div>
+
+    <!-- Maia replies by voice + shows text -->
+    <div style="display:flex;gap:7px;align-items:flex-start">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🤖</div>
+      <div class="cb-ai" style="max-width:82%">
+        🚻 Turn <strong>left</strong> at the front desk — first door on the right!
+      </div>
+    </div>
+
+    <!-- User speaks again -->
+    <div style="display:flex;justify-content:flex-end;align-items:flex-end;gap:6px">
+      <div style="font-size:8px;color:var(--ink3);font-weight:700;display:flex;align-items:center;gap:3px">
+        <div style="width:5px;height:5px;border-radius:50%;background:var(--coral)"></div>You said
+      </div>
+      <div class="cb-user">"How long do I have to wait?"</div>
+    </div>
+
+    <!-- Maia replies -->
+    <div style="display:flex;gap:7px;align-items:flex-start">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🤖</div>
+      <div class="cb-ai" style="max-width:82%">
+        You're <strong>#3</strong> in the queue — about <strong>8 minutes</strong>. Dr. Mathur is nearly ready! 😊
+      </div>
+    </div>
+
+    <!-- Urgent triage from Maia -->
+    <div style="display:flex;gap:7px;align-items:flex-start">
+      <div style="width:26px;height:26px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">🤖</div>
+      <div style="background:var(--red-l);border-radius:12px 12px 12px 3px;padding:10px 13px;border:1.5px solid rgba(217,48,37,.18);max-width:85%">
+        <p style="font-size:12px;color:var(--ink);line-height:1.5;margin-bottom:7px">Are you feeling <strong>unwell right now</strong>?</p>
+        <div style="display:flex;gap:8px">
+          <button class="bb bbr" style="flex:1;padding:9px;font-size:12px;border-radius:10px">🚨 Yes</button>
+          <button class="bb bbs" style="flex:1;padding:9px;font-size:12px;border-radius:10px">I'm fine</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Input row — mic is primary -->
+  <div style="padding:10px 14px;border-top:1px solid var(--border);flex-shrink:0">
+    <!-- Quick tap chips -->
+    <div style="display:flex;gap:6px;overflow-x:auto;margin-bottom:8px;padding-bottom:2px">
+      <div class="qtc">My queue #</div>
+      <div class="qtc">Wait time</div>
+      <div class="qtc">Washroom</div>
+      <div class="qtc">Parking</div>
+      <div class="qtc">Clinic hours</div>
+    </div>
+    <!-- Big mic button + type option -->
+    <div style="display:flex;gap:8px;align-items:center">
+      <div style="flex:1;background:#fff;border-radius:30px;border:1.5px solid var(--border);padding:9px 14px;display:flex;gap:7px;align-items:center">
+        <p style="flex:1;font-size:11px;color:var(--ink3)">Or type here...</p>
+        <div style="display:flex;gap:2px;align-items:center">
+          <div class="wb t1" style="height:5px"></div>
+          <div class="wb t2" style="height:8px"></div>
+          <div class="wb t3" style="height:6px"></div>
+        </div>
+      </div>
+      <!-- Big mic button -->
+      <div style="width:44px;height:44px;background:var(--lav);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(123,111,208,.35);flex-shrink:0">🎤</div>
+    </div>
+    <p style="font-size:9px;color:var(--ink3);text-align:center;margin-top:6px;font-weight:600">Just speak — Maia is listening</p>
+  </div>
+</div>`},
+
+// ━━ 5: QUEUE VIEW ━━
+{ss:'Screen 6 · Queue', st:'📋 Live Queue',
+h:`<div class="scr" style="background:#FAFAFE;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <div style="display:flex;align-items:center;gap:4px">
+      <div style="width:5px;height:5px;border-radius:50%;background:var(--sage);animation:blink 2s infinite"></div>
+      <span style="font-size:9px;font-weight:800;color:var(--sage)">Live</span>
+    </div>
+  </div>
+
+  <!-- Maia announces live -->
+  <div class="va-band">
+    <div class="va-avatar">
+      <div class="va-ring" style="border-color:rgba(123,111,208,.2)"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label">MAIA · IDLE</div>
+      <div class="va-text">"Here's the live queue. Ask me anything!"</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb idle" style="height:4px"></div>
+          <div class="wb idle" style="height:4px"></div>
+          <div class="wb idle" style="height:4px"></div>
+        </div>
+        <span style="font-size:8px;color:var(--ink3);margin-left:4px">Tap 🎤 to speak</span>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;padding:12px 14px;display:flex;flex-direction:column;gap:9px">
+
+    <div style="background:#fff;border-radius:13px;border:1px solid var(--border);padding:11px;display:flex;justify-content:space-around">
+      <div style="text-align:center"><p style="font-size:20px;font-weight:900;color:var(--lav)">6</p><p style="font-size:8px;color:var(--ink3);font-weight:700">WAITING</p></div>
+      <div style="width:1px;background:var(--border)"></div>
+      <div style="text-align:center"><p style="font-size:20px;font-weight:900;color:var(--ink)">~5 min</p><p style="font-size:8px;color:var(--ink3);font-weight:700">PER PATIENT</p></div>
+    </div>
+
+    <div>
+      <p style="font-size:9px;font-weight:800;color:var(--ink3);letter-spacing:.5px;margin-bottom:5px">WITH DOCTOR NOW</p>
+      <div style="background:var(--sage-l);border-radius:13px;padding:11px;display:flex;align-items:center;gap:11px;border:1.5px solid rgba(92,122,94,.2)">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,var(--sage),#3D6E45);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:#fff;font-weight:800">P</div>
+        <div><p style="font-size:13px;font-weight:800;color:var(--ink)">Priya K.</p><p style="font-size:10px;color:var(--sage)">ANC Visit</p></div>
+        <div style="margin-left:auto;background:var(--sage);color:#fff;font-size:9px;font-weight:800;padding:3px 9px;border-radius:9px">IN</div>
+      </div>
+    </div>
+
+    <div>
+      <p style="font-size:9px;font-weight:800;color:var(--ink3);letter-spacing:.5px;margin-bottom:5px">WAITING</p>
+      <div style="display:flex;flex-direction:column;gap:7px">
+
+        <!-- Highlighted — current user -->
+        <div style="background:#fff;border-radius:13px;padding:11px;display:flex;align-items:center;gap:11px;border:2.5px solid var(--lav);box-shadow:0 2px 12px rgba(123,111,208,.14)">
+          <div style="width:38px;height:38px;background:var(--lav);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:#fff;flex-shrink:0">#2</div>
+          <div><p style="font-size:13px;font-weight:800;color:var(--ink)">Meera K. <span style="background:var(--lav-l);color:var(--lav-d);font-size:9px;font-weight:800;padding:2px 7px;border-radius:7px;margin-left:3px">YOU</span></p><p style="font-size:10px;color:var(--ink3)">ANC · Week 32</p></div>
+          <p style="font-size:12px;font-weight:800;color:var(--lav);margin-left:auto">~8 min</p>
+        </div>
+
+        <div style="background:#fff;border-radius:13px;padding:11px;display:flex;align-items:center;gap:11px;border:1px solid var(--border)">
+          <div style="width:38px;height:38px;background:var(--soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--ink3);flex-shrink:0">#3</div>
+          <div><p style="font-size:13px;font-weight:700;color:var(--ink)">Sunita D.</p><p style="font-size:10px;color:var(--ink3)">Follow-up</p></div>
+          <p style="font-size:12px;font-weight:700;color:var(--ink3);margin-left:auto">~18 min</p>
+        </div>
+
+        <div style="background:#fff;border-radius:13px;padding:11px;display:flex;align-items:center;gap:11px;border:1px solid var(--border)">
+          <div style="width:38px;height:38px;background:var(--soft);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:var(--ink3);flex-shrink:0">#4</div>
+          <div><p style="font-size:13px;font-weight:700;color:var(--ink)">Kavya N.</p><p style="font-size:10px;color:var(--ink3)">PCOS Check-up</p></div>
+          <p style="font-size:12px;font-weight:700;color:var(--ink3);margin-left:auto">~23 min</p>
+        </div>
+
+        <!-- Urgent -->
+        <div style="background:var(--red-l);border-radius:13px;padding:11px;display:flex;align-items:center;gap:11px;border:1.5px solid rgba(217,48,37,.2)">
+          <div style="width:38px;height:38px;background:rgba(217,48,37,.12);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;border:2px solid rgba(217,48,37,.2)">🚨</div>
+          <div><p style="font-size:13px;font-weight:800;color:var(--red)">Urgent · Priority</p><p style="font-size:10px;color:var(--red);opacity:.7">Flagged by Maia</p></div>
+          <div style="background:var(--red);color:#fff;font-size:8px;font-weight:800;padding:3px 8px;border-radius:8px;margin-left:auto">URGENT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px">
+    <button class="bb bbs" onclick="go(0)" style="flex:1;padding:12px;font-size:12px"><span style="font-size:16px">🏠</span><span>Home</span></button>
+    <div style="width:44px;height:44px;background:var(--lav);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;cursor:pointer;box-shadow:0 4px 14px rgba(123,111,208,.3);flex-shrink:0">🎤</div>
+  </div>
+</div>`},
+
+// ━━ 6: MANUAL CHECK-IN ━━
+{ss:'Screen 7 · Manual', st:'✋ Enter Phone Number',
+h:`<div class="scr" style="background:#fff;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <button onclick="go(0)" style="background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--ink3);font-family:var(--sans)">← Back</button>
+  </div>
+
+  <!-- Maia prompts for phone number -->
+  <div class="va-band">
+    <div class="va-avatar">
+      <div class="va-ring talking"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label">MAIA · SPEAKING</div>
+      <div class="va-text">"No problem! Just enter your phone number and I'll find your appointment."</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t1" style="height:9px"></div>
+          <div class="wb t2" style="height:14px"></div>
+          <div class="wb t3" style="height:10px"></div>
+          <div class="wb t4" style="height:16px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;padding:14px;display:flex;flex-direction:column;gap:11px">
+
+    <div>
+      <p style="font-family:var(--serif);font-size:20px;color:var(--ink);margin-bottom:4px">Your phone number</p>
+      <p style="font-size:11px;color:var(--ink3)">Tap or say the digits aloud</p>
+    </div>
+
+    <!-- Phone display -->
+    <div style="background:var(--soft);border-radius:13px;border:2px solid var(--lav);padding:13px 15px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">📱</span>
+      <p style="font-size:17px;font-weight:800;color:var(--ink);flex:1;letter-spacing:1px">+91 98765 43210</p>
+      <div style="width:2px;height:19px;background:var(--lav);animation:blink 1s infinite"></div>
+    </div>
+
+    <!-- Numpad -->
+    <div style="background:var(--soft);border-radius:15px;padding:11px">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:7px">
+        ${[1,2,3,4,5,6,7,8,9,'*',0,'⌫'].map(k=>`
+        <button style="padding:15px;font-size:19px;font-weight:800;font-family:'Nunito',sans-serif;background:#fff;border:1px solid var(--border);border-radius:11px;cursor:pointer;color:var(--ink);box-shadow:0 2px 5px rgba(0,0,0,.05)">${k}</button>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Found result -->
+    <div style="background:var(--lav-bg);border-radius:13px;border:2px solid var(--lav-l);padding:12px">
+      <div style="display:flex;gap:9px;align-items:center;margin-bottom:9px">
+        <div style="width:40px;height:40px;background:linear-gradient(135deg,var(--lav),var(--lav-d));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0">🤰</div>
+        <div>
+          <p style="font-size:14px;font-weight:800;color:var(--ink)">Meera Kulkarni</p>
+          <p style="font-size:10px;color:var(--ink3)">ANC · Week 32 · Dr. Mathur · 10:30 AM</p>
+        </div>
+        <span style="background:var(--sage-l);color:var(--sage);font-size:8px;font-weight:800;padding:3px 8px;border-radius:7px;margin-left:auto">Found ✓</span>
+      </div>
+      <button class="bb bbl" onclick="go(3)" style="padding:15px;font-size:14px">
+        <span>✓ That's Me — Check In</span>
+      </button>
+    </div>
+  </div>
+</div>`},
+
+// ━━ 7: NOT RECOGNISED ━━
+{ss:'Screen 8 · Not Found', st:'❓ Maia Helps',
+h:`<div class="scr" style="background:#fff;display:flex;flex-direction:column">
+  <div class="ktb">
+    <div class="kbn"><div class="kbd">🌸</div><span class="kbnt">Materna</span></div>
+    <button onclick="go(0)" style="background:none;border:none;cursor:pointer;font-size:10px;font-weight:700;color:var(--ink3);font-family:var(--sans)">← Back</button>
+  </div>
+
+  <!-- Maia offers help -->
+  <div class="va-band">
+    <div class="va-avatar">
+      <div class="va-ring talking"></div>
+      <div class="va-inner">🤖</div>
+    </div>
+    <div class="va-speech">
+      <div class="va-label">MAIA · SPEAKING</div>
+      <div class="va-text">"No worries! Let's try again or I can check you in another way."</div>
+      <div class="va-state">
+        <div class="wave-bars">
+          <div class="wb t3" style="height:10px"></div>
+          <div class="wb t1" style="height:15px"></div>
+          <div class="wb t4" style="height:8px"></div>
+          <div class="wb t2" style="height:13px"></div>
+          <div class="wb t5" style="height:11px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:14px;gap:13px">
+
+    <div style="width:76px;height:76px;background:rgba(217,48,37,.07);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;border:3px solid rgba(217,48,37,.14)">😕</div>
+
+    <div style="text-align:center">
+      <p style="font-family:var(--serif);font-size:22px;color:var(--ink);margin-bottom:5px">Didn't recognise you</p>
+      <p style="font-size:12px;color:var(--ink3)">That's fine — easy fix!</p>
+    </div>
+
+    <!-- Tips — icon-only -->
+    <div style="width:100%;background:var(--soft);border-radius:13px;padding:13px;display:flex;justify-content:space-around;border:1px solid var(--border)">
+      <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">💡</div><p style="font-size:10px;color:var(--ink3);font-weight:600">Better lighting</p></div>
+      <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">📏</div><p style="font-size:10px;color:var(--ink3);font-weight:600">Step closer</p></div>
+      <div style="text-align:center"><div style="font-size:24px;margin-bottom:4px">🧢</div><p style="font-size:10px;color:var(--ink3);font-weight:600">Remove cap</p></div>
+    </div>
+
+    <div style="width:100%;display:flex;flex-direction:column;gap:9px">
+      <button class="bb bbl" onclick="go(1)" style="padding:18px;font-size:15px"><span style="font-size:24px">🔄</span><span>Try Again</span></button>
+      <button class="bb bbs" onclick="go(6)" style="padding:15px;font-size:13px"><span style="font-size:22px">✋</span><span>Use Phone Number</span></button>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+    <div style="flex:1;background:var(--soft);border-radius:25px;padding:9px 13px;font-size:11px;color:var(--ink3)">Or speak to Maia...</div>
+    <div style="width:42px;height:42px;background:var(--lav);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:19px;cursor:pointer;box-shadow:0 4px 14px rgba(123,111,208,.3);flex-shrink:0">🎤</div>
+  </div>
+</div>`}
+];
+
+// ── Navigation ──
+function go(i){
+  S.forEach((_,n)=>{
+    const d=document.getElementById('fd'+n), l=document.getElementById('fl'+n);
+    if(d) d.className='fd '+(n<i?'done':n===i?'act':'pend');
+    if(l) l.className='fl '+(n===i?'a':'');
+  });
+  document.getElementById('ks').innerHTML=`<div style="position:absolute;inset:0">${S[i].h}</div>`;
+  document.getElementById('ss').textContent=S[i].ss;
+  document.getElementById('st').textContent=S[i].st;
+}
+window.go=go;
+go(0);
+</script>
+</body>
+</html>
